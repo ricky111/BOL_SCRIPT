@@ -1,4 +1,4 @@
-ver = "1.0"
+ver = "1.01"
 if myHero.charName ~= "Syndra" then return end
 
 Host = "raw.github.com"
