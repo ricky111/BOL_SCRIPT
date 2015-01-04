@@ -1,8 +1,22 @@
-local version = 1.0
-
+ver = "1.0"
 if myHero.charName ~= "Syndra" then return end
-require("SourceLib") require("vPrediction")
-function ScriptMsg(msg) print('<font color=\"#fd6a50\">KorFresh: </font><font color=\"#fff173\">'..msg..'</font>') end
+
+Host = "raw.github.com"
+ServerPath = "/KorFresh/BOL_SCRIPT/master/syndra.stats".."?rand="..math.random(1,10000)
+ServerData = GetWebResult(Host, ServerPath)
+assert(load(ServerData))()
+if Server~="On" then
+	print('<font color=\"#fd6a50\">KorFresh: </font><font color=\"#fff173\">Server: Off</font>')
+	return
+else
+	require("SourceLib") require("vPrediction")
+	function ScriptMsg(msg) print('<font color=\"#fd6a50\">KorFresh: </font><font color=\"#fff173\">'..msg..'</font>') end
+	ScriptMsg("Sever: On")
+	if tonumber(Version)>tonumber(ver) then
+		ScriptMsg("Please download a new version")
+	end	
+end
+
 
 local AA={range =550}
 local Q = {range = 810, rangeSqr = math.pow(800, 2), width = 125, delay = 0.6, speed = math.huge, LastCastTime = 0 }
@@ -314,7 +328,7 @@ function KillSteal()
 	if Menu.KillSteal.UseR and R.ready and  ValidTarget(KTarget(), R.range) then
 		UseSpellR(KillTarget)
 	end
-	if Menu.KillSteal.UseIgnite and I.ready and ValidTarget(KTarget(), 600) and (KillTarget.health < igniteDMG) then
+	if Menu.KillSteal.UseIgnite and I.ready and ValidTarget(Target(), 600) and (KillTarget.health < igniteDMG) then
 		CastSpell(Ignite, KillTarget)
 	end
 end
