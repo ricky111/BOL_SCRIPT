@@ -31,7 +31,7 @@ local qetime=0
 local w_cnt = 0
 local q_cnt=0
 local QTarget
-local Balls ={[1] = {Added = false, CanGet = false, lastQ, object},[2] = {Added = false, CanGet = false, lastQ, object},[3] = {Added = false, CanGet = false, lastQ, object},[4] = {Added = false, CanGet = false, lastQ, object},[5] = {Added = false, CanGet = false, lastQ, object},[6] = {Added = false, CanGet = false, lastQ, object}}
+local Balls ={[1] = {Added = false, CanGet = false, lastQ, object, lastob},[2] = {Added = false, CanGet = false, lastQ, object, lastob},[3] = {Added = false, CanGet = false, lastQ, object, lastob},[4] = {Added = false, CanGet = false, lastQ, object, lastob},[5] = {Added = false, CanGet = false, lastQ, object, lastob},[6] = {Added = false, CanGet = false, lastQ, object, lastob}}
 local MagicPen = myHero.magicPen
 local MagicPenPercent = 1-myHero.magicPenPercent
 local MagicArmor = 0
@@ -55,7 +55,7 @@ elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
 	Ignite = SUMMONER_2
 end
 
-TS = TargetSelector(TARGET_LESS_CAST, QE.range, DAMAGE_MAGIC, false)
+TS = TargetSelector(TARGET_LESS_CAST_PRIORITY, QE.range, DAMAGE_MAGIC, false)
 KTS = TargetSelector(TARGET_LOW_HP, QE.range, DAMAGE_MAGIC, false)
 EnemyMinions = minionManager(MINION_ENEMY, W.range, player, MINION_SORT_MAXHEALTH_DEC)
 JungleMobs = minionManager(MINION_JUNGLE, W.range, player, MINION_SORT_MAXHEALTH_DEC)
@@ -97,6 +97,7 @@ function OnLoad()
 		Menu.KillSteal:addParam("UseIgnite", "Use Ignite", SCRIPT_PARAM_ONOFF, true)
 	Menu:addSubMenu("Misc", "Misc")
 		Menu.Misc:addParam("QESturn", "Use Q+E CC", SCRIPT_PARAM_ONKEYDOWN, false, GetKey('T'))
+		Menu.Misc:addParam("SC", "Status", SCRIPT_PARAM_ONOFF, true)
 	Menu:addSubMenu("Draw","Draw")
 		Menu.Draw:addParam("DrawAA", "Draw AA", SCRIPT_PARAM_ONOFF, false)
 		Menu.Draw:addParam("DrawQ", "Draw Q", SCRIPT_PARAM_ONOFF, false)
@@ -148,15 +149,26 @@ function OnDraw()
 	if Menu.Draw.DrawW then DrawCircle(myHero.x, myHero.y, myHero.z, W.range, 0xFF0024ff) end
 	if Menu.Draw.DrawE then DrawCircle(myHero.x, myHero.y, myHero.z, E.range, 0xFF00ff0c) end
 	if Menu.Draw.DrawR then DrawCircle(myHero.x, myHero.y, myHero.z, R.range, 0xFFffcc00) end
-	if Menu.Draw.DrawQE then DrawCircle(myHero.x, myHero.y, myHero.z, QE.range, 0xFFFF0000) end	
+	if Menu.Draw.DrawQE then DrawCircle(myHero.x, myHero.y, myHero.z, QE.range, 0xFFFF0000) end
+	if Menu.Misc.SC then		
+	end
 end
 
 function OnProcessSpell(object, spell)
 	if object.isMe then
 		if spell.name:find("SyndraQ") then qtime=os.clock() 	end 
 		if spell.name:find("SyndraW") then w_cnt = 1 wtime=os.clock() end
+		if spell.name:find("SyndraE") then
+			etime=os.clock()
+			for i = 1, 6, 1 do  
+				if Balls[i].Added then							
+					Balls[i].lastob = Balls[i].object.x					
+				end
+			break
+    			end    
+		end
 		if spell.name:find("syndrawcast") then w_cnt = 0 end
-	end	
+	end
 end
 
 function OnTick()
@@ -164,9 +176,10 @@ function OnTick()
 	QTarget=Target()
 	KillTarget=KTarget()
 	KillSteal()
+	if Menu.Misc.QESturn then if Q.ready and E.ready and ValidTarget(Target(), QE.range) then QEcombo() end end
 	if Menu.KeySet.ComboKey then Combo() end
 	if Menu.KeySet.HarassKey then Harass() end
-	if Menu.KeySet.LaneClearKey then LaneClear() 	end
+	if Menu.KeySet.LaneClearKey then LaneClear() end
 end
 
 function Combo()
@@ -175,18 +188,7 @@ function Combo()
 
 	local pos, info, hitchance
 	if Q.ready and E.ready and Menu.Combo.UseQ and Menu.Combo.UseE and ValidTarget(Target(), QE.range) then
-		if ValidTarget(Target(), Q.range) then
-			pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
-			CastSpell(_Q, pos.x, pos.z)
-			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
-			qetime=os.clock()
-		else
-			pos, hitchance = VP:GetCircularCastPosition(QTarget, QE.delay, QE.width, QE.range, math.huge)
-			QPos = myHero+(Vector(QTarget)-myHero):normalized()*700
-			CastSpell(_Q, QPos.x, QPos.z)
-			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
-			qetime=os.clock()
-		end
+		QEcombo()
 	end		
 	
 	if Q.ready and Menu.Combo.UseQ and ValidTarget(Target(), Q.range) then
@@ -209,18 +211,7 @@ function Harass()
 
 	local pos, info, hitchance
 	if Q.ready and E.ready and Menu.Harass.UseQ and Menu.Harass.UseE and ValidTarget(Target(), QE.range) then
-		if ValidTarget(Target(), Q.range) then
-			pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
-			CastSpell(_Q, pos.x, pos.z)
-			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
-			etime=os.clock()
-		else
-			pos, hitchance = VP:GetCircularCastPosition(QTarget, QE.delay, QE.width, QE.range, math.huge)
-			QPos = myHero+(Vector(QTarget)-myHero):normalized()*700
-			CastSpell(_Q, QPos.x, QPos.z)
-			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
-			etime=os.clock()
-		end
+		QEcombo()
 	end		
 	
 	if Q.ready and Menu.Harass.UseQ and ValidTarget(Target(), Q.range) then
@@ -237,16 +228,30 @@ function Harass()
 	end
 end
 
+function QEcombo()
+	if ValidTarget(Target(), Q.range) then
+			pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
+			CastSpell(_Q, pos.x, pos.z)
+			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
+			qetime=os.clock()
+		else
+			pos, hitchance = VP:GetCircularCastPosition(QTarget, QE.delay, QE.width, QE.range, math.huge)
+			QPos = myHero+(Vector(QTarget)-myHero):normalized()*700
+			CastSpell(_Q, QPos.x, QPos.z)
+			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
+			qetime=os.clock()
+	end
+end
+
 function UseSpellW(t)		
-	if w_cnt==0 and W.ready then
-		if os.clock()>qetime+0.9 then
-			for i=1,6,1 do				
-				if Balls[i].object and GetDistance(Balls[i].object, myHero) <= W.range then					
-					CastSpell(_W, Balls[i].object.x, Balls[i].object.z)					
-				end
-				break
+	if w_cnt==0 and W.ready then		
+		for i=1,6,1 do				
+			if Balls[i].object and GetDistance(Balls[i].object, myHero) <= W.range and Balls[i].object.x~=Balls[i].lastob and os.clock() > etime+0.5  then
+				CastSpell(_W, Balls[i].object.x, Balls[i].object.z)					
 			end
+			break
 		end
+		
 		for i, posiblepets in pairs(PosiblePets.objects) do
 			if posiblepets == nil then return end			
 			if W.ready and ValidTarget(posiblepets, W.range) and os.clock()>=qtime and os.clock() > qetime+0.25 then				
@@ -374,15 +379,11 @@ function Target()
 	if TS.target then 
 		return TS.target 
 	end 
-	KTS:update() 
-	if TS.target then 
-		return KTS.target 
-	end 
 end
 
-function KTarget() 	
+function KTarget()
 	KTS:update() 
-	if TS.target then 
+	if KTS.target then 
 		return KTS.target 
 	end 
 end
