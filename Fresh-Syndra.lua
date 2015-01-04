@@ -17,7 +17,6 @@ else
 	end	
 end
 
-
 local AA={range =550}
 local Q = {range = 810, rangeSqr = math.pow(800, 2), width = 125, delay = 0.6, speed = math.huge, LastCastTime = 0 }
 local W = {range = 935, rangeSqr = math.pow(925, 2), width = 190, delay = 0.8, speed = math.huge, LastCastTime = 0}
