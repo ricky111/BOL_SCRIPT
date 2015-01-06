@@ -2,7 +2,7 @@ ver = "1.02"
 if myHero.charName ~= "Syndra" then return end
 
 Host = "raw.github.com"
-ServerPath = "/KorFresh/BOL_SCRIPT/master/syndra.stats".."?rand="..math.random(1,10000)
+ServerPath = "/KorFresh/BOL_SCRIPT/master/Syndra.stats".."?rand="..math.random(1,10000)
 ServerData = GetWebResult(Host, ServerPath)
 assert(load(ServerData))()
 if Server~="On" then
