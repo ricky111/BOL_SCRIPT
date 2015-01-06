@@ -260,13 +260,13 @@ end
 
 function QEcombo()
 	if ValidTarget(Target(), Q.range) then
-			pos, hitchance = VP:GetLineCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
+			pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
 			CastSpell(_Q, pos.x, pos.z)			
 			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
 			qetime=os.clock()
 			
 		else
-			pos, hitchance = VP:GetLineCastPosition(QTarget, QE.delay, QE.width, QE.range, math.huge)
+			pos, hitchance = VP:GetCircularCastPosition(QTarget, QE.delay, QE.width, QE.range, math.huge)
 			QPos = myHero+(Vector(QTarget)-myHero):normalized()*700
 			CastSpell(_Q, QPos.x, QPos.z)
 			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
