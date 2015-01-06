@@ -1,4 +1,4 @@
-ver = "1.01"
+ver = "1.02"
 if myHero.charName ~= "Syndra" then return end
 
 Host = "raw.github.com"
@@ -17,13 +17,13 @@ else
 	end	
 end
 
-local AA={range =550}
-local Q = {range = 810, rangeSqr = math.pow(800, 2), width = 125, delay = 0.6, speed = math.huge, LastCastTime = 0 }
-local W = {range = 935, rangeSqr = math.pow(925, 2), width = 190, delay = 0.8, speed = math.huge, LastCastTime = 0}
-local E = {range = 710, rangeSqr = math.pow(700, 2), width = 45 * 0.5, delay = 0.25, speed = 2500, LastCastTime = 0}
-local R = {range = 735, rangeSqr = math.pow(725, 2), delay = 0.25}
-local QE = {range = 1280, rangeSqr = math.pow(1280, 2), width = 60, delay = 0, speed = 1600}
-local I = {ready=0}
+AA={range =550}
+Q = {range = 830, rangeSqr = math.pow(800, 2), width = 125, delay = 0.6, speed = math.huge, LastCastTime = 0 }
+W = {range = 955, rangeSqr = math.pow(925, 2), width = 190, delay = 0.8, speed = math.huge, LastCastTime = 0}
+E = {range = 730, rangeSqr = math.pow(700, 2), width = 45 * 0.5, delay = 0.25, speed = 2500, LastCastTime = 0}
+R = {range = 745, rangeSqr = math.pow(725, 2), delay = 0.25}
+QE = {range = 1280, rangeSqr = math.pow(1280, 2), width = 60, delay = 0, speed = 1600}
+I = {ready=0}
 local wtime = 0
 local qtime=0
 local etime=0
@@ -150,16 +150,19 @@ function OnDraw()
 	if Menu.Draw.DrawE then DrawCircle(myHero.x, myHero.y, myHero.z, E.range, 0xFF00ff0c) end
 	if Menu.Draw.DrawR then DrawCircle(myHero.x, myHero.y, myHero.z, R.range, 0xFFffcc00) end
 	if Menu.Draw.DrawQE then DrawCircle(myHero.x, myHero.y, myHero.z, QE.range, 0xFFFF0000) end
-	if Menu.Misc.SC then		
+	if Menu.Misc.SC then
+		--DrawText("Q on", 20, 1300, 720, ARGB(255, 255, 255, 255))
 	end
 end
 
 function OnProcessSpell(object, spell)
 	if object.isMe then
-		if spell.name:find("SyndraQ") then qtime=os.clock() 	end 
+		if spell.name:find("SyndraQ") then
+			qtime=os.clock()
+		end 
 		if spell.name:find("SyndraW") then w_cnt = 1 wtime=os.clock() end
 		if spell.name:find("SyndraE") then
-			etime=os.clock()
+			etime=os.clock()			
 			for i = 1, 6, 1 do  
 				if Balls[i].Added then							
 					Balls[i].lastob = Balls[i].object.x					
@@ -180,6 +183,33 @@ function OnTick()
 	if Menu.KeySet.ComboKey then Combo() end
 	if Menu.KeySet.HarassKey then Harass() end
 	if Menu.KeySet.LaneClearKey then LaneClear() end
+end
+
+function Check()
+	if os.clock() >= (wtime+6) then w_cnt = 0 end	
+	EnemyMinions:update()
+	JungleMobs:update()
+	PosiblePets:update()
+
+	Q.ready = myHero:CanUseSpell(_Q) == READY
+	Q.level = player:GetSpellData(_Q).level
+
+	W.ready = myHero:CanUseSpell(_W) == READY
+	W.level = player:GetSpellData(_W).level
+
+	E.ready = myHero:CanUseSpell(_E) == READY
+	E.level = player:GetSpellData(_E).level
+
+	R.ready = myHero:CanUseSpell(_R) == READY
+	R.level = player:GetSpellData(_R).level
+	--if Ignite then I.ready = Ignite ~= nil and myHero:CanUseSpell(Ignite) == READY end	
+	if R.level ~= 0 then trueRDMG = ((myHero.ap*0.2+RDMG[R.level])*q_cnt)+((myHero.ap*0.2+RDMG[R.level])*3) end
+	if R.level==3 then R.range=750 end
+	if Q.level~=0 then trueQDMG=(myHero.ap*0.6)+QDMG[Q.level] end
+	if Q.level==5 then trueQDMG=((myHero.ap*0.6)+QDMG[Q.level])+(((myHero.ap*0.6)+QDMG[Q.level])*0.15) end
+	if W.level~=0 then trueWDMG=(myHero.ap*0.7)+WDMG[W.level] end
+	if E.level~=0 then trueEDMG=(myHero.ap*0.4)+EDMG[E.level] end
+	igniteDMG = 50 + 20 * player.level
 end
 
 function Combo()
@@ -230,23 +260,24 @@ end
 
 function QEcombo()
 	if ValidTarget(Target(), Q.range) then
-			pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
-			CastSpell(_Q, pos.x, pos.z)
+			pos, hitchance = VP:GetLineCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
+			CastSpell(_Q, pos.x, pos.z)			
 			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
 			qetime=os.clock()
+			
 		else
-			pos, hitchance = VP:GetCircularCastPosition(QTarget, QE.delay, QE.width, QE.range, math.huge)
+			pos, hitchance = VP:GetLineCastPosition(QTarget, QE.delay, QE.width, QE.range, math.huge)
 			QPos = myHero+(Vector(QTarget)-myHero):normalized()*700
 			CastSpell(_Q, QPos.x, QPos.z)
 			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
-			qetime=os.clock()
+			qetime=os.clock()			
 	end
 end
 
-function UseSpellW(t)		
+function UseSpellW(t)	
 	if w_cnt==0 and W.ready then		
 		for i=1,6,1 do				
-			if Balls[i].object and GetDistance(Balls[i].object, myHero) <= W.range and Balls[i].object.x~=Balls[i].lastob and os.clock() > etime+0.5  then
+			if Balls[i].object and GetDistance(Balls[i].object, myHero) <= W.range and Balls[i].object.x~=Balls[i].lastob and os.clock() > etime+0.75  then
 				CastSpell(_W, Balls[i].object.x, Balls[i].object.z)					
 			end
 			break
@@ -386,31 +417,4 @@ function KTarget()
 	if KTS.target then 
 		return KTS.target 
 	end 
-end
-
-function Check()
-	if os.clock() >= (wtime+6) then w_cnt = 0 end
-	EnemyMinions:update()
-	JungleMobs:update()
-	PosiblePets:update()
-
-	Q.ready = myHero:CanUseSpell(_Q) == READY
-	Q.level = player:GetSpellData(_Q).level
-
-	W.ready = myHero:CanUseSpell(_W) == READY
-	W.level = player:GetSpellData(_W).level
-
-	E.ready = myHero:CanUseSpell(_E) == READY
-	E.level = player:GetSpellData(_E).level
-
-	R.ready = myHero:CanUseSpell(_R) == READY
-	R.level = player:GetSpellData(_R).level
-	--if Ignite then I.ready = Ignite ~= nil and myHero:CanUseSpell(Ignite) == READY end	
-	if R.level ~= 0 then trueRDMG = ((myHero.ap*0.2+RDMG[R.level])*q_cnt)+((myHero.ap*0.2+RDMG[R.level])*3) end
-	if R.level==3 then R.range=750 end
-	if Q.level~=0 then trueQDMG=(myHero.ap*0.6)+QDMG[Q.level] end
-	if Q.level==5 then trueQDMG=((myHero.ap*0.6)+QDMG[Q.level])+(((myHero.ap*0.6)+QDMG[Q.level])*0.15) end
-	if W.level~=0 then trueWDMG=(myHero.ap*0.7)+WDMG[W.level] end
-	if E.level~=0 then trueEDMG=(myHero.ap*0.4)+EDMG[E.level] end
-	igniteDMG = 50 + 20 * player.level
 end
