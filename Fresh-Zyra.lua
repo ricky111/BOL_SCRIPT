@@ -196,7 +196,7 @@ end
 function Combo()
 	if myHero.dead then return end
 	if QTarget == nil and ETarget == nil and RTarget == nil then return end
-	if E.ready and Menu.Combo.UseE and ValidTarget(ETarget, Q.range) and Q.ready and Menu.Combo.UseQ and ValidTarget(QTarget, Q.range) then
+	if E.ready and Menu.Combo.UseE and ValidTarget(ETarget, E.range) and Q.ready and Menu.Combo.UseQ and ValidTarget(QTarget, Q.range) then
 		UseSpell(Q)
 	end
 	if E.ready and Menu.Combo.UseE and ValidTarget(ETarget, E.range) then
@@ -213,7 +213,7 @@ end
 function Harass()
 	if myHero.dead then return end
 	if QTarget == nil and ETarget == nil and RTarget == nil then return end
-	if E.ready and Menu.Harass.UseE and ValidTarget(ETarget, Q.range) and Q.ready and Menu.Harass.UseQ and ValidTarget(QTarget, Q.range) then
+	if E.ready and Menu.Harass.UseE and ValidTarget(ETarget, E.range) and Q.ready and Menu.Harass.UseQ and ValidTarget(QTarget, Q.range) then
 		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)		
 		CastSpell(_Q, pos.x, pos.z)		
 		if Menu.Combo.UseW then
@@ -313,7 +313,7 @@ end
 
 function UseSpell(spell)
 	if spell==Q then
-		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)		
+		pos, hitchance, NT = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
 		CastSpell(_Q, pos.x, pos.z)		
 		if Menu.Combo.UseW then
 			if W.ready then
@@ -333,7 +333,7 @@ function UseSpell(spell)
 		end
 	end
 	if spell==R then
-		pos, hitchance = VP:GetCircularCastPosition(RTarget, R.delay, R.width, R.range, math.huge)
+		pos, hitchance, NT = VP:GetCircularCastPosition(RTarget, R.delay, R.width, R.range, math.huge)
 		CastSpell(_R, pos.x, pos.z)
 	end
 end
