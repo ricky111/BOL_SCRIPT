@@ -21,21 +21,20 @@ AA={range =575}
 Q = {range = 830, rangeSqr = math.pow(800, 2), width = 85, delay = 0, speed = math.huge, LastCastTime = 0 }
 W = {range = 880, rangeSqr = math.pow(925, 2), width = 0, delay = 0, speed = math.huge, LastCastTime = 0}
 E = {range = 1180, rangeSqr = math.pow(700, 2), width = 70, delay = 0, speed = 1400, LastCastTime = 0}
-R = {range = 730, rangeSqr = math.pow(725, 2), width = 250, delay = 0, LastCastTime =0}
+R = {range = 730, rangeSqr = math.pow(725, 2), width = 70, delay = 0, speed = 1900, LastCastTime =0}
 P = {range = 830, rangeSqr = math.pow(800, 2), width = 85, delay = 0, speed = math.huge, LastCastTime = 0 }
 
-
-QTarget
 MagicPen = myHero.magicPen
 MagicPenPercent = 1-myHero.magicPenPercent
 MagicArmor = 0
 
-
 QDMG={70,105,140,175,210}
 WDMG={80,120,160,200,240}
-EDMG={70,115,160,205,250}
-RDMG={90,135,180}
+EDMG={60,95,130,165,200}
+RDMG={180,265,350}
 igniteDMG = 0
+
+ppos=false
 
 if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") then
 	Ignite = SUMMONER_1
@@ -43,18 +42,21 @@ elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
 	Ignite = SUMMONER_2
 end
 
-TS = TargetSelector(TARGET_LESS_CAST_PRIORITY, E.range, DAMAGE_MAGIC, false)
-KTS = TargetSelector(TARGET_LOW_HP, E.range, DAMAGE_MAGIC, false)
+QTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, Q.range, DAMAGE_MAGIC, false)
+WTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, W.range, DAMAGE_MAGIC, false)
+ETS = TargetSelector(TARGET_LESS_CAST_PRIORITY, E.range, DAMAGE_MAGIC, false)
+RTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, R.range, DAMAGE_MAGIC, false)
+PTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, P.range, DAMAGE_MAGIC, false)
+KTS = TargetSelector(TARGET_LOW_HP, Q.range, DAMAGE_MAGIC, false)
+
 EnemyMinions = minionManager(MINION_ENEMY, E.range, player, MINION_SORT_MAXHEALTH_DEC)
 JungleMobs = minionManager(MINION_JUNGLE, E.range, player, MINION_SORT_MAXHEALTH_DEC)
 PosiblePets = minionManager(MINION_OTHER, E.range, myHero, MINION_SORT_MAXHEALTH_DEC)
 
-QTarget = nil
-
 function OnLoad()
 	VP=VPrediction()
 
-	Menu=scriptConfig("Fresh Syndra / KorFresh", "fresh_syndra")	
+	Menu=scriptConfig("Fresh Zyra / KorFresh", "fresh_zyra")	
 	STS = SimpleTS(STS_PRIORITY_LESS_CAST_MAGIC)
 	Menu:addSubMenu("Set Target Selector Priority", "STS")
 	STS:AddToMenu(Menu.STS)
@@ -74,106 +76,42 @@ function OnLoad()
 		Menu.Harass:addParam("UseE", "Use E", SCRIPT_PARAM_ONOFF, false)
 		Menu.Harass:addParam("UseR", "Use R", SCRIPT_PARAM_ONOFF, false)
 	Menu:addSubMenu("LaneClear", "LaneClear")
-		Menu.LaneClear:addParam("UseQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
-		Menu.LaneClear:addParam("UseW", "Use W", SCRIPT_PARAM_ONOFF, true)
+		Menu.LaneClear:addParam("UseQ", "Use Q", SCRIPT_PARAM_ONOFF, true)		
 		Menu.LaneClear:addParam("UseE", "Use E", SCRIPT_PARAM_ONOFF, false)		
 	Menu:addSubMenu("KillSteal", "KillSteal")
 		Menu.KillSteal:addParam("UseQ", "Use Q", SCRIPT_PARAM_ONOFF, true)
 		Menu.KillSteal:addParam("UseW", "Use W", SCRIPT_PARAM_ONOFF, true)
 		Menu.KillSteal:addParam("UseE", "Use E", SCRIPT_PARAM_ONOFF, true)
 		Menu.KillSteal:addParam("UseR", "Use R", SCRIPT_PARAM_ONOFF, true)		
-		Menu.KillSteal:addParam("UseIgnite", "Use Ignite", SCRIPT_PARAM_ONOFF, true)
-	Menu:addSubMenu("Misc", "Misc")
-		Menu.Misc:addParam("QESturn", "Use Q+E CC", SCRIPT_PARAM_ONKEYDOWN, false, GetKey('T'))
-		Menu.Misc:addParam("SC", "Status", SCRIPT_PARAM_ONOFF, true)
+		Menu.KillSteal:addParam("UseIgnite", "Use Ignite", SCRIPT_PARAM_ONOFF, true)	
+	Menu:addSubMenu("Misc","Misc")
+		Menu.Misc:addParam("Debug", "Debug Mode", SCRIPT_PARAM_ONOFF, false)
+		Menu.Misc:addParam("UltHit", "Ult HitNumber", SCRIPT_PARAM_SLICE,1,1,5,0)
 	Menu:addSubMenu("Draw","Draw")
 		Menu.Draw:addParam("DrawAA", "Draw AA", SCRIPT_PARAM_ONOFF, false)
 		Menu.Draw:addParam("DrawQ", "Draw Q", SCRIPT_PARAM_ONOFF, false)
 		Menu.Draw:addParam("DrawW", "Draw W", SCRIPT_PARAM_ONOFF, false)
 		Menu.Draw:addParam("DrawE", "Draw E", SCRIPT_PARAM_ONOFF, false)
 		Menu.Draw:addParam("DrawR", "Draw R", SCRIPT_PARAM_ONOFF, false)
-		Menu.Draw:addParam("DrawQE", "Draw QE", SCRIPT_PARAM_ONOFF, false)
-end
-
-function OnCreateObj(object)
-	if object.name:find("Seed") then
-		GetBall(object)
-	end
-end
-
-function GetBall(seed)
-	for i = 1, 6, 1 do  
-		if not Balls[i].Added then
-			Balls[i].Added = true
-			Balls[i].CanGet = true
-			Balls[i].lastQ = os.clock()
-			Balls[i].object = seed
-			break
-    		end    
-	end  
-end
-
-function OnDeleteObj(object)
-	if object.name:find("Syndra") and (object.name:find("_Q_idle.troy") or object.name:find("_Q_Lv5_idle.troy")) then    		
-		LossBall(object)    
-	end
-end
-
-function LossBall(seed)  
-	for i = 1, 6, 1 do  
-		if Balls[i].Added and os.clock()-Balls[i].lastQ >= 6 then
-			Balls[i].Added = false
-			Balls[i].CanGet = false
-			Balls[i].lastQ = nil      
-			Balls[i].object = nil
-		end    
-	end  
-end
-
-function OnDraw()
-	if myHero.dead then return end
-	if Menu.Draw.DrawAA then DrawCircle(myHero.x, myHero.y, myHero.z, AA.range, 0xFFFF0000)	end
-	if Menu.Draw.DrawQ then DrawCircle(myHero.x, myHero.y, myHero.z, Q.range, 0xFF9c00ff) end
-	if Menu.Draw.DrawW then DrawCircle(myHero.x, myHero.y, myHero.z, W.range, 0xFF0024ff) end
-	if Menu.Draw.DrawE then DrawCircle(myHero.x, myHero.y, myHero.z, E.range, 0xFF00ff0c) end
-	if Menu.Draw.DrawR then DrawCircle(myHero.x, myHero.y, myHero.z, R.range, 0xFFffcc00) end
-	if Menu.Draw.DrawQE then DrawCircle(myHero.x, myHero.y, myHero.z, QE.range, 0xFFFF0000) end
-	if Menu.Misc.SC then
-		--DrawText("Q on", 20, 1300, 720, ARGB(255, 255, 255, 255))
-	end
 end
 
 function OnProcessSpell(object, spell)
 	if object.isMe then
 		if spell.name:find("SyndraQ") then
 			qtime=os.clock()
-		end 
-		if spell.name:find("SyndraW") then w_cnt = 1 wtime=os.clock() end
-		if spell.name:find("SyndraE") then
-			etime=os.clock()			
-			for i = 1, 6, 1 do  
-				if Balls[i].Added then							
-					Balls[i].lastob = Balls[i].object.x					
-				end
-			break
-    			end    
-		end
-		if spell.name:find("syndrawcast") then w_cnt = 0 end
+		end 		
 	end
 end
 
-function OnTick()
-	Check()
-	QTarget=Target()
-	KillTarget=KTarget()
-	KillSteal()
-	if Menu.Misc.QESturn then if Q.ready and E.ready and ValidTarget(Target(), QE.range) then QEcombo() end end
-	if Menu.KeySet.ComboKey then Combo() end
-	if Menu.KeySet.HarassKey then Harass() end
-	if Menu.KeySet.LaneClearKey then LaneClear() end
+function OnCreateObj(object)
+	--if object.name:find("Seed") then	
+	--end
 end
 
-function Check()	
+function OnDeleteObj(object)	
+end
+
+function Check()
 	EnemyMinions:update()
 	JungleMobs:update()
 	PosiblePets:update()
@@ -189,166 +127,125 @@ function Check()
 
 	R.ready = myHero:CanUseSpell(_R) == READY
 	R.level = player:GetSpellData(_R).level
-	--if Ignite then I.ready = Ignite ~= nil and myHero:CanUseSpell(Ignite) == READY end	
-	if R.level ~= 0 then trueRDMG = ((myHero.ap*0.2+RDMG[R.level])*q_cnt)+((myHero.ap*0.2+RDMG[R.level])*3) end
-	if R.level==3 then R.range=750 end
-	if Q.level~=0 then trueQDMG=(myHero.ap*0.6)+QDMG[Q.level] end
-	if Q.level==5 then trueQDMG=((myHero.ap*0.6)+QDMG[Q.level])+(((myHero.ap*0.6)+QDMG[Q.level])*0.15) end
-	if W.level~=0 then trueWDMG=(myHero.ap*0.7)+WDMG[W.level] end
-	if E.level~=0 then trueEDMG=(myHero.ap*0.4)+EDMG[E.level] end
+	
 	igniteDMG = 50 + 20 * player.level
+end
+
+function OnDraw()
+	if myHero.dead then return end
+	if Menu.Draw.DrawAA then DrawCircle(myHero.x, myHero.y, myHero.z, AA.range, 0xFFFF0000)	end
+	if Menu.Draw.DrawQ then DrawCircle(myHero.x, myHero.y, myHero.z, Q.range, 0xFF9c00ff) end
+	if Menu.Draw.DrawW then DrawCircle(myHero.x, myHero.y, myHero.z, W.range, 0xFF0024ff) end
+	if Menu.Draw.DrawE then DrawCircle(myHero.x, myHero.y, myHero.z, E.range, 0xFF00ff0c) end
+	if Menu.Draw.DrawR then DrawCircle(myHero.x, myHero.y, myHero.z, R.range, 0xFFffcc00) end	
+	if Menu.Misc.Debug then		
+		if Q.ready then
+			DrawText("Q: READY", 20, 600, 300, ARGB(255, 255, 255, 255))
+		else
+			DrawText("Q: Wait", 20, 600, 300, ARGB(255, 255, 255, 255))
+		end
+		if QTarget then
+			DrawText("Q Target: "..QTarget.charName, 20, 600, 320, ARGB(255, 255, 255, 255))			
+		else
+			DrawText("Q Target: Nil", 20, 600, 320, ARGB(255, 255, 255, 255))
+		end
+		if W.ready then
+			DrawText("W: READY", 20, 600, 360, ARGB(255, 255, 255, 255))
+		else
+			DrawText("W: Wait", 20, 600, 360, ARGB(255, 255, 255, 255))
+		end
+		if WTarget then
+			DrawText("W Target: "..WTarget.charName, 20, 600, 380, ARGB(255, 255, 255, 255))
+		else
+			DrawText("W Target: Nil", 20, 600, 380, ARGB(255, 255, 255, 255))
+		end
+		if E.ready then
+			DrawText("E: READY", 20, 600, 420, ARGB(255, 255, 255, 255))
+		else
+			DrawText("E: Wait", 20, 600, 420, ARGB(255, 255, 255, 255))
+		end
+		if ETarget then
+			DrawText("E Target: "..ETarget.charName, 20, 600, 440, ARGB(255, 255, 255, 255))
+		else
+			DrawText("E Target: Nil", 20, 600, 440, ARGB(255, 255, 255, 255))
+		end
+		if R.ready then
+			DrawText("R: READY", 20, 600, 480, ARGB(255, 255, 255, 255))
+		else
+			DrawText("R: Wait", 20, 600, 480, ARGB(255, 255, 255, 255))
+		end
+		if RTarget then
+			DrawText("R Target: "..RTarget.charName, 20, 600, 500, ARGB(255, 255, 255, 255))
+		else
+			DrawText("R Target: Nil", 20, 600, 500, ARGB(255, 255, 255, 255))			
+		end			
+	end
+end
+
+function OnTick()
+	Check()
+	QTarget=Target(Q)
+	WTarget=Target(W)
+	ETarget=Target(E)
+	RTarget=Target(R)
+	if Menu.KeySet.ComboKey then Combo() end
+	if Menu.KeySet.HarassKey then Harass() end
+	if Menu.KeySet.LaneClearKey then LaneClear() end
 end
 
 function Combo()
 	if myHero.dead then return end
-	if QTarget == nil then return end
-
-	local pos, info, hitchance	
-	
+	if QTarget == nil and ETarget == nil and RTarget == nil then return end
+	if E.ready and Menu.Combo.UseE and ValidTarget(ETarget, Q.range) and Q.ready and Menu.Combo.UseQ and ValidTarget(QTarget, Q.range) then
+		UseSpell(Q)
+	end
+	if E.ready and Menu.Combo.UseE and ValidTarget(ETarget, E.range) then
+		UseSpell(E)
+	end
 	if Q.ready and Menu.Combo.UseQ and ValidTarget(QTarget, Q.range) then
-		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
-		CastSpell(_Q, pos.x, pos.z)
+		UseSpell(Q)
 	end
-
-	if W.ready and Menu.Combo.UseW and ValidTarget(Target(), W.range) then		
-		UseSpellW(QTarget)
-	end
-
-	if R.ready and Menu.Combo.UseR and ValidTarget(Target(), R.range) then		
-		UseSpellR(QTarget)		
+	if R.ready and Menu.Combo.UseR and ValidTarget(RTarget, R.range) then		
+		UseSpell(R)
 	end
 end
 
 function Harass()
 	if myHero.dead then return end
-	if QTarget == nil then return end
-
-	local pos, info, hitchance
-	if Q.ready and E.ready and Menu.Harass.UseQ and Menu.Harass.UseE and ValidTarget(Target(), QE.range) then
-		QEcombo()
-	end		
-	
-	if Q.ready and Menu.Harass.UseQ and ValidTarget(Target(), Q.range) then
-		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
-		CastSpell(_Q, pos.x, pos.z)
-	end
-
-	if W.ready and Menu.Harass.UseW and ValidTarget(Target(), W.range) then
-		UseSpellW(QTarget)
-	end
-
-	if R.ready and Menu.Harass.UseR and ValidTarget(Target(), R.range) then		
-		UseSpellR(QTarget)
-	end
-end
-
-function QEcombo()
-	if ValidTarget(Target(), Q.range) then
-			pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
-			CastSpell(_Q, pos.x, pos.z)			
-			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
-			qetime=os.clock()
-			
-		else
-			pos, hitchance = VP:GetCircularCastPosition(QTarget, QE.delay, QE.width, QE.range, math.huge)
-			QPos = myHero+(Vector(QTarget)-myHero):normalized()*700
-			CastSpell(_Q, QPos.x, QPos.z)
-			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
-			qetime=os.clock()			
-	end
-end
-
-function UseSpellW(t)	
-	if w_cnt==0 and W.ready then		
-		for i=1,6,1 do				
-			if Balls[i].object and GetDistance(Balls[i].object, myHero) <= W.range and Balls[i].object.x~=Balls[i].lastob and os.clock() > etime+0.75  then
-				CastSpell(_W, Balls[i].object.x, Balls[i].object.z)					
-			end
-			break
-		end
-		
-		for i, posiblepets in pairs(PosiblePets.objects) do
-			if posiblepets == nil then return end			
-			if W.ready and ValidTarget(posiblepets, W.range) and os.clock()>=qtime and os.clock() > qetime+0.25 then				
-				pos, hitchance = VP:GetCircularCastPosition(posiblepets, W.delay, W.width, W.range, math.huge)
+	if QTarget == nil and ETarget == nil and RTarget == nil then return end
+	if E.ready and Menu.Harass.UseE and ValidTarget(ETarget, Q.range) and Q.ready and Menu.Harass.UseQ and ValidTarget(QTarget, Q.range) then
+		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)		
+		CastSpell(_Q, pos.x, pos.z)		
+		if Menu.Combo.UseW then
+			if W.ready then
 				CastSpell(_W, pos.x, pos.z)
-			end
-		end
-
-		for i, minion in pairs(EnemyMinions.objects) do
-			if minion == nil then return end			
-			if W.ready and ValidTarget(minion, W.range) and os.clock()>=qtime and os.clock() > qetime+0.25 then				
-				pos, hitchance = VP:GetCircularCastPosition(minion, W.delay, W.width, W.range, math.huge)
-				CastSpell(_W, pos.x, pos.z)
-			end
-		end
-
-		for i, junglemob in pairs(JungleMobs.objects) do
-  			if junglemob == nil then return end
-  			if W.ready and ValidTarget(junglemob, W.range) and os.clock()>=qtime and os.clock() > qetime+0.25 then
-				wtime = os.clock()				
-				pos, hitchance = VP:GetCircularCastPosition(junglemob, W.delay, W.width, W.range, math.huge)
-				CastSpell(_W, pos.x, pos.z)
+				DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.25)
+				DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.5)				
 			end
 		end
 	end
-	if w_cnt==1 then
-		if t==QTarget and ValidTarget(QTarget, W.range) then
-			pos, hitchance = VP:GetCircularCastPosition(QTarget, W.delay, W.width, W.range, math.huge)
+	if E.ready and Menu.Harass.UseE and ValidTarget(ETarget, E.range) then
+		pos, hitchance = VP:GetLineCastPosition(ETarget, E.delay, E.width, E.range, math.huge)
+		CastSpell(_E, pos.x, pos.z)
+		if Menu.Combo.UseW then
 			CastSpell(_W, pos.x, pos.z)
-		end
-		if t==KillTarget and ValidTarget(KillTarget, W.range) then
-			pos, hitchance = VP:GetCircularCastPosition(KillTarget, W.delay, W.width, W.range, math.huge)
-			CastSpell(_W, pos.x, pos.z)
+			DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.25)
+			DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.5)
 		end
 	end
-end
-
-function UseSpellR(t)	
-	if t==QTarget then
-		lastRDMG = (100/(100+QTarget.magicArmor-(QTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueRDMG)	
-		if QTarget.health < lastRDMG then
-			CastSpell(_R, QTarget)
+	if Q.ready and Menu.Harass.UseQ and ValidTarget(QTarget, Q.range) then
+		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)		
+		CastSpell(_Q, pos.x, pos.z)		
+		if Menu.Combo.UseW then
+			if W.ready then
+				CastSpell(_W, pos.x, pos.z)
+				DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.25)
+				DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.5)				
+			end
 		end
 	end
-	if t==KillTarget then
-		lastRDMG = (100/(100+KillTarget.magicArmor-(KillTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueRDMG)	
-		if KillTarget.health < lastRDMG then
-			CastSpell(_R, KillTarget)
-		end
-	end
-end
-
-function KillSteal()
-	if myHero.dead then return end
-	if KillTarget == nil then return end	
-	if Menu.KillSteal.UseQ and Q.ready and ValidTarget(KTarget(), Q.range) then
-		lastQDMG = (100/(100+KillTarget.magicArmor-(KillTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueQDMG)
-		pos, hitchance = VP:GetCircularCastPosition(KillTarget, Q.delay, Q.width, Q.range, math.huge)
-		if KillTarget.health<lastQDMG then
-			CastSpell(_Q, pos.x, pos.z)
-		end
-	end
-	if Menu.KillSteal.UseW and W.ready and ValidTarget(KTarget(), W.range) then
-		lastWDMG = (100/(100+KillTarget.magicArmor-(KillTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueWDMG)
-		pos, hitchance = VP:GetCircularCastPosition(KillTarget, W.delay, W.width, W.range, math.huge)
-		if KillTarget.health<lastWDMG then
-			UseSpellW(KillTarget)
-		end
-	end
-	if Menu.KillSteal.UseE and E.ready and  ValidTarget(KTarget(), E.range) then
-		lastEDMG = (100/(100+KillTarget.magicArmor-(KillTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueEDMG)
-		pos, hitchance = VP:GetCircularCastPosition(KillTarget, E.delay, E.width, E.range, math.huge)
-		if KillTarget.health<lastEDMG then
-			CastSpell(_E, pos.x, pos.z)
-			etime=os.clock()
-		end
-	end
-	if Menu.KillSteal.UseR and R.ready and  ValidTarget(KTarget(), R.range) then
-		UseSpellR(KillTarget)
-	end
-	if Menu.KillSteal.UseIgnite and I.ready and ValidTarget(Target(), 600) and (KillTarget.health < igniteDMG) then
-		CastSpell(Ignite, KillTarget)
+	if R.ready and Menu.Harass.UseR and ValidTarget(RTarget, R.range) then		
+		UseSpell(R)
 	end
 end
 
@@ -357,48 +254,86 @@ function LaneClear()
 		if minion == nil then
 			return
 		end
-		if Q.ready and ValidTarget(minion, Q.range) and os.clock()>=wtime and Menu.LaneClear.UseQ then
+		if Q.ready and ValidTarget(minion, Q.range) and Menu.LaneClear.UseQ then
 			pos, hitchance = VP:GetCircularCastPosition(minion, Q.delay, Q.width, Q.range, math.huge)
 			CastSpell(_Q, pos.x, pos.z)
-		end
-		if W.ready and ValidTarget(minion, W.range) and os.clock()>=qtime and Menu.LaneClear.UseW then
-			pos, hitchance = VP:GetCircularCastPosition(minion, W.delay, W.width, W.range, math.huge)
-			CastSpell(_W, pos.x, pos.z)
-		end
-		if E.ready and ValidTarget(minion, E.range) and os.clock()>=qtime and Menu.LaneClear.UseE then
-			pos, hitchance = VP:GetCircularCastPosition(minion, E.delay, E.width, E.range, math.huge)
-			CastSpell(_Q, pos.x, pos.z)
+		end		
+		if E.ready and ValidTarget(minion, E.range) and Menu.LaneClear.UseE then
+			pos, hitchance = VP:GetLineCastPosition(minion, E.delay, E.width, E.range, math.huge)
+			CastSpell(_E, pos.x, pos.z)
 		end
 	end
 	for i, junglemob in pairs(JungleMobs.objects) do
   		if junglemob == nil then
     			return
   		end
-  		if Q.ready and ValidTarget(junglemob, Q.range) and os.clock()>=wtime and Menu.LaneClear.UseQ then
+  		if Q.ready and ValidTarget(junglemob, Q.range) and Menu.LaneClear.UseQ then
 			pos, hitchance = VP:GetCircularCastPosition(junglemob, Q.delay, Q.width, Q.range, math.huge)
 			CastSpell(_Q, pos.x, pos.z)
-		end
-		if W.ready and ValidTarget(junglemob, W.range) and os.clock()>=qtime and Menu.LaneClear.UseW then
-			pos, hitchance = VP:GetCircularCastPosition(junglemob, W.delay, W.width, W.range, math.huge)
-			CastSpell(_W, pos.x, pos.z)
-		end
-		if E.ready and ValidTarget(junglemob, E.range) and os.clock()>=qtime and Menu.LaneClear.UseE then
-			pos, hitchance = VP:GetCircularCastPosition(junglemob, E.delay, E.width, E.range, math.huge)
-			CastSpell(_Q, pos.x, pos.z)
+		end		
+		if E.ready and ValidTarget(junglemob, E.range) and Menu.LaneClear.UseE then
+			pos, hitchance = VP:GetLineCastPosition(junglemob, E.delay, E.width, E.range, math.huge)
+			CastSpell(_E, pos.x, pos.z)
 		end		
 	end
 end
 
-function Target() 
-	TS:update() 
-	if TS.target then 
-		return TS.target 
-	end 
+function Target(spell) 
+	if spell==Q then		
+		QTS:update()		
+		if QTS.target then
+			return QTS.target
+		end
+	end
+	if spell==W then
+		WTS:update()
+		if WTS.target then
+			return WTS.target
+		end
+	end
+	if spell==E then
+		ETS:update()
+		if ETS.target then
+			return ETS.target
+		end
+	end
+	if spell==R then
+		RTS:update()
+		if RTS.target then
+			return RTS.target
+		end
+	end
+	if spell==P then
+		PTS:update()
+		if PTS.target then
+			return PTS.target
+		end
+	end
 end
 
-function KTarget()
-	KTS:update() 
-	if KTS.target then 
-		return KTS.target 
-	end 
+function UseSpell(spell)
+	if spell==Q then
+		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)		
+		CastSpell(_Q, pos.x, pos.z)		
+		if Menu.Combo.UseW then
+			if W.ready then
+				CastSpell(_W, pos.x, pos.z)
+				DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.25)
+				DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.5)				
+			end
+		end
+	end
+	if spell==E then
+		pos, hitchance = VP:GetLineCastPosition(ETarget, E.delay, E.width, E.range, math.huge)
+		CastSpell(_E, pos.x, pos.z)
+		if Menu.Combo.UseW then
+			CastSpell(_W, pos.x, pos.z)
+			DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.25)
+			DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.5)
+		end
+	end
+	if spell==R then
+		pos, hitchance = VP:GetCircularCastPosition(RTarget, R.delay, R.width, R.range, math.huge)
+		CastSpell(_R, pos.x, pos.z)
+	end
 end
