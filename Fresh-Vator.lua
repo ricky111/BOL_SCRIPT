@@ -4,6 +4,18 @@ stats = myHero.controlled
 
 summoner = {summonerdot, summonerflash, summonerheal, summonerbarrier, summonermana, summonerboost, summonersmite}
 JungleMobs = minionManager(MINION_JUNGLE, 760, player, MINION_SORT_MAXHEALTH_DEC)
+
+local mybuff={
+	[1]={add=false, name="Stun", clock=nil}, -- 스턴 pass
+	[2]={add=false, name="taunt", clock=nil}, -- 도발
+	[3]={add=false, name="slow", clock=nil}, -- 슬로우 pass
+	[4]={add=false, name="root", clock=nil}, -- 속박
+	[5]={add=false, name="fear", clock=nil}, -- 공포
+	[6]={add=false, name="charm", clock=nil}, --매혹
+	[7]={add=false, name="suppress", clock=nil}, --무장해제
+	[8]={add=false, name="flee", clock=nil}, -- 도망
+	[9]={add=false, name="knockup", clock=nil} --에어본
+}
 -- 레드골램  SRU_Krug11.1.2 / 블루 골렘 SRU_Krug5.1.2
 -- 레드 레드 SRU_RED 10.1.1 / 블루 레드 SRU_RED4.1.1
 -- 레드 고스트 SRU_Razorbeak9.1.1 // 블루 고스트 SRU_Razorbeak 3.1.1
@@ -25,14 +37,24 @@ function OnTick()
 		if ValidTarget(junglemob, 600) then
 			print(junglemob.name)			
 		end
+	end	
+end
+
+function OnGainBuff(unit, buff)	
+	if unit.isMe then
+		for i=1, 9, 1 do
+			print(buff.name.." // "..mybuff[i].name)
+			if buff.name==mybuff[i].name then
+				print(mybuff[i].name.."버프일치")
+			end
+		end
 	end
 end
 
 function OnDraw()
 	DrawCircle(myHero.x, myHero.y, myHero.z, 760, 0xFFFF0000)
-	DrawText("L SPELL: "..Left, 20, 700, 320, ARGB(255, 255, 255, 255))
-	DrawText("R SPELL: "..Right, 20, 700, 340, ARGB(255, 255, 255, 255))
-	DrawText("Move: "..stats, 20, 700, 360, ARGB(255, 255, 255, 255))
+	DrawText("L SPELL: "..Left, 20, 1000, 720, ARGB(255, 255, 255, 255))
+	DrawText("R SPELL: "..Right, 20, 1000, 740, ARGB(255, 255, 255, 255))
 end
 
 function Check()
