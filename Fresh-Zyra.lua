@@ -48,7 +48,7 @@ WTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, W.range, DAMAGE_MAGIC, false)
 ETS = TargetSelector(TARGET_LESS_CAST_PRIORITY, E.range, DAMAGE_MAGIC, false)
 RTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, R.range, DAMAGE_MAGIC, false)
 PTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, P.range, DAMAGE_MAGIC, false)
-KTS = TargetSelector(TARGET_LOW_HP, Q.range, DAMAGE_MAGIC, false)
+KTS = TargetSelector(TARGET_LOW_HP, E.range, DAMAGE_MAGIC, false)
 ITS = TargetSelector(TARGET_LESS_CAST_PRIORITY, I.range, DAMAGE_MAGIC, false)
 
 EnemyMinions = minionManager(MINION_ENEMY, E.range, player, MINION_SORT_MAXHEALTH_DEC)
@@ -192,6 +192,8 @@ function OnTick()
 	ETarget=Target(E)
 	RTarget=Target(R)
 	ITarget=Target(I)
+	KTarget=Target(K)
+	KillSteal()
 	if Menu.Misc.inter then
 		if E.ready and ValidTarget(ITarget, I.range) then
 			pos, hitchance = VP:GetLineCastPosition(ITarget, E.delay, E.width/2, E.range, math.huge)
@@ -288,43 +290,22 @@ function LaneClear()
 	end
 end
 
+function KillSteal()
+	if myHero.dead then return end	
+	if KTarget == nil then return end		
+	if Menu.KillSteal.UseIgnite and ValidTarget(KTarget, 600) and (KTarget.health < igniteDMG) then
+		CastSpell(Ignite, KTarget)
+	end
+end
+
 function Target(spell) 
-	if spell==Q then		
-		QTS:update()		
-		if QTS.target then
-			return QTS.target
-		end
-	end
-	if spell==W then
-		WTS:update()
-		if WTS.target then
-			return WTS.target
-		end
-	end
-	if spell==E then
-		ETS:update()
-		if ETS.target then
-			return ETS.target
-		end
-	end
-	if spell==R then
-		RTS:update()
-		if RTS.target then
-			return RTS.target
-		end
-	end
-	if spell==P then
-		PTS:update()
-		if PTS.target then
-			return PTS.target
-		end
-	end
-	if spell==I then
-		ITS:update()
-		if ITS.target then
-			return ITS.target
-		end
-	end
+	if spell==Q then	 QTS:update() if QTS.target then return QTS.target end end
+	if spell==W then WTS:update() if WTS.target then return WTS.target end end
+	if spell==E then ETS:update() if ETS.target then return ETS.target end end
+	if spell==R then RTS:update() if RTS.target then return RTS.target end end
+	if spell==P then PTS:update() if PTS.target then return PTS.target end end
+	if spell==I then ITS:update() if ITS.target then return ITS.target end end
+	if spell==K then KTS:update() if KTS.target then return KTS.target end end
 end
 
 function UseSpell(spell)
