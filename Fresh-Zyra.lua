@@ -216,7 +216,7 @@ function Harass()
 	if E.ready and Menu.Harass.UseE and ValidTarget(ETarget, Q.range) and Q.ready and Menu.Harass.UseQ and ValidTarget(QTarget, Q.range) then
 		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)		
 		CastSpell(_Q, pos.x, pos.z)		
-		if Menu.Combo.UseW then
+		if Menu.Harass.UseW then
 			if W.ready then
 				CastSpell(_W, pos.x, pos.z)
 				DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.25)
@@ -227,7 +227,7 @@ function Harass()
 	if E.ready and Menu.Harass.UseE and ValidTarget(ETarget, E.range) then
 		pos, hitchance = VP:GetLineCastPosition(ETarget, E.delay, E.width, E.range, math.huge)
 		CastSpell(_E, pos.x, pos.z)
-		if Menu.Combo.UseW then
+		if Menu.Harass.UseW then
 			CastSpell(_W, pos.x, pos.z)
 			DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.25)
 			DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.5)
@@ -236,7 +236,7 @@ function Harass()
 	if Q.ready and Menu.Harass.UseQ and ValidTarget(QTarget, Q.range) then
 		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)		
 		CastSpell(_Q, pos.x, pos.z)		
-		if Menu.Combo.UseW then
+		if Menu.Harass.UseW then
 			if W.ready then
 				CastSpell(_W, pos.x, pos.z)
 				DelayAction(function() CastSpell(_W, pos.x, pos.z) end, 0.25)
