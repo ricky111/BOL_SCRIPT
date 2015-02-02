@@ -1,4 +1,4 @@
-ver = "1.00"
+ver = "1.10"
 if myHero.charName ~= "Zyra" then return end
 
 Host = "raw.github.com"
@@ -19,6 +19,7 @@ end
 
 AA={range =575}
 Q = {range = 830, rangeSqr = math.pow(800, 2), width = 85, delay = 0, speed = math.huge, LastCastTime = 0 }
+I = {range = 200, rangeSqr = math.pow(800, 2), width = 85, delay = 0, speed = math.huge, LastCastTime = 0 }
 W = {range = 880, rangeSqr = math.pow(925, 2), width = 0, delay = 0, speed = math.huge, LastCastTime = 0}
 E = {range = 1180, rangeSqr = math.pow(700, 2), width = 70, delay = 0, speed = 1400, LastCastTime = 0}
 R = {range = 730, rangeSqr = math.pow(725, 2), width = 70, delay = 0, speed = 1900, LastCastTime =0}
@@ -48,6 +49,7 @@ ETS = TargetSelector(TARGET_LESS_CAST_PRIORITY, E.range, DAMAGE_MAGIC, false)
 RTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, R.range, DAMAGE_MAGIC, false)
 PTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, P.range, DAMAGE_MAGIC, false)
 KTS = TargetSelector(TARGET_LOW_HP, Q.range, DAMAGE_MAGIC, false)
+ITS = TargetSelector(TARGET_LESS_CAST_PRIORITY, I.range, DAMAGE_MAGIC, false)
 
 EnemyMinions = minionManager(MINION_ENEMY, E.range, player, MINION_SORT_MAXHEALTH_DEC)
 JungleMobs = minionManager(MINION_JUNGLE, E.range, player, MINION_SORT_MAXHEALTH_DEC)
@@ -86,6 +88,7 @@ function OnLoad()
 		Menu.KillSteal:addParam("UseIgnite", "Use Ignite", SCRIPT_PARAM_ONOFF, true)	
 	Menu:addSubMenu("Misc","Misc")
 		Menu.Misc:addParam("Debug", "Debug Mode", SCRIPT_PARAM_ONOFF, false)
+		Menu.Misc:addParam("inter", "Interrupt", SCRIPT_PARAM_ONOFF, true)
 		Menu.Misc:addParam("UltHit", "Ult HitNumber", SCRIPT_PARAM_SLICE,1,1,5,0)
 	Menu:addSubMenu("Draw","Draw")
 		Menu.Draw:addParam("DrawAA", "Draw AA", SCRIPT_PARAM_ONOFF, false)
@@ -188,6 +191,13 @@ function OnTick()
 	WTarget=Target(W)
 	ETarget=Target(E)
 	RTarget=Target(R)
+	ITarget=Target(I)
+	if Menu.Misc.inter then
+		if E.ready and ValidTarget(ITarget, I.range) then
+			pos, hitchance = VP:GetLineCastPosition(ITarget, E.delay, E.width/2, E.range, math.huge)
+			CastSpell(_E, pos.x, pos.z)
+		end
+	end
 	if Menu.KeySet.ComboKey then Combo() end
 	if Menu.KeySet.HarassKey then Harass() end
 	if Menu.KeySet.LaneClearKey then LaneClear() end
@@ -198,12 +208,12 @@ function Combo()
 	if QTarget == nil and ETarget == nil and RTarget == nil then return end
 	if E.ready and Menu.Combo.UseE and ValidTarget(ETarget, Q.range) and Q.ready and Menu.Combo.UseQ and ValidTarget(QTarget, Q.range) then
 		UseSpell(Q)
+	end	
+	if Q.ready and Menu.Combo.UseQ and ValidTarget(QTarget, Q.range) then
+		UseSpell(Q)
 	end
 	if E.ready and Menu.Combo.UseE and ValidTarget(ETarget, E.range) then
 		UseSpell(E)
-	end
-	if Q.ready and Menu.Combo.UseQ and ValidTarget(QTarget, Q.range) then
-		UseSpell(Q)
 	end
 	if R.ready and Menu.Combo.UseR and ValidTarget(RTarget, R.range) then		
 		UseSpell(R)
@@ -307,6 +317,12 @@ function Target(spell)
 		PTS:update()
 		if PTS.target then
 			return PTS.target
+		end
+	end
+	if spell==I then
+		ITS:update()
+		if ITS.target then
+			return ITS.target
 		end
 	end
 end
