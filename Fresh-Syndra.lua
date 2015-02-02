@@ -1,4 +1,4 @@
-ver = "1.02"
+ver = "1.10"
 if myHero.charName ~= "Syndra" then return end
 
 Host = "raw.github.com"
@@ -22,6 +22,7 @@ Q = {range = 830, rangeSqr = math.pow(800, 2), width = 125, delay = 0.6, speed =
 W = {range = 955, rangeSqr = math.pow(925, 2), width = 190, delay = 0.8, speed = math.huge, LastCastTime = 0}
 E = {range = 730, rangeSqr = math.pow(700, 2), width = 45 * 0.5, delay = 0.25, speed = 2500, LastCastTime = 0}
 R = {range = 745, rangeSqr = math.pow(725, 2), delay = 0.25}
+autoE = {range = 200, rangeSqr = math.pow(1280, 2), width = 60, delay = 0, speed = 1600}
 QE = {range = 1280, rangeSqr = math.pow(1280, 2), width = 60, delay = 0, speed = 1600}
 I = {ready=0}
 local wtime = 0
@@ -38,7 +39,7 @@ local MagicArmor = 0
 local RDMG={90,135,180}
 local trueRDMG=0
 local lastRDMG =0
-local QDMG={70,110,150,190,230}
+local QDMG={50,95,140,185,230}
 local trueQDMG=0
 local lastQDMG =0
 local WDMG={80,120,160,200,240}
@@ -55,13 +56,18 @@ elseif myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then
 	Ignite = SUMMONER_2
 end
 
-TS = TargetSelector(TARGET_LESS_CAST_PRIORITY, QE.range, DAMAGE_MAGIC, false)
-KTS = TargetSelector(TARGET_LOW_HP, QE.range, DAMAGE_MAGIC, false)
+QTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, Q.range, DAMAGE_MAGIC, false)
+WTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, W.range, DAMAGE_MAGIC, false)
+ETS = TargetSelector(TARGET_LESS_CAST_PRIORITY, E.range, DAMAGE_MAGIC, false)
+RTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, R.range, DAMAGE_MAGIC, false)
+InterTS = TargetSelector(TARGET_LESS_CAST_PRIORITY, autoE.range, DAMAGE_MAGIC, false)
+KTS = TargetSelector(TARGET_LOW_HP, Q.range, DAMAGE_MAGIC, false)
+QETS = TargetSelector(TARGET_LESS_CAST_PRIORITY, QE.range, DAMAGE_MAGIC, false)
 EnemyMinions = minionManager(MINION_ENEMY, W.range, player, MINION_SORT_MAXHEALTH_DEC)
 JungleMobs = minionManager(MINION_JUNGLE, W.range, player, MINION_SORT_MAXHEALTH_DEC)
 PosiblePets = minionManager(MINION_OTHER, W.range, myHero, MINION_SORT_MAXHEALTH_DEC)
 
-QTarget = nil
+QTarget = nil Inter=nil
 
 function OnLoad()
 	VP=VPrediction()
@@ -97,12 +103,13 @@ function OnLoad()
 		Menu.KillSteal:addParam("UseIgnite", "Use Ignite", SCRIPT_PARAM_ONOFF, true)
 	Menu:addSubMenu("Misc", "Misc")
 		Menu.Misc:addParam("QESturn", "Use Q+E CC", SCRIPT_PARAM_ONKEYDOWN, false, GetKey('T'))
+		Menu.Misc:addParam("inter", "interrupt E", SCRIPT_PARAM_ONOFF, true)
 		Menu.Misc:addParam("SC", "Status", SCRIPT_PARAM_ONOFF, true)
 	Menu:addSubMenu("Draw","Draw")
 		Menu.Draw:addParam("DrawAA", "Draw AA", SCRIPT_PARAM_ONOFF, false)
 		Menu.Draw:addParam("DrawQ", "Draw Q", SCRIPT_PARAM_ONOFF, false)
 		Menu.Draw:addParam("DrawW", "Draw W", SCRIPT_PARAM_ONOFF, false)
-		Menu.Draw:addParam("DrawE", "Draw E", SCRIPT_PARAM_ONOFF, false)
+		Menu.Draw:addParam("DrawE", "Draw E", SCRIPT_PARAM_ONOFF, false)		
 		Menu.Draw:addParam("DrawR", "Draw R", SCRIPT_PARAM_ONOFF, false)
 		Menu.Draw:addParam("DrawQE", "Draw QE", SCRIPT_PARAM_ONOFF, false)
 end
@@ -147,7 +154,7 @@ function OnDraw()
 	if Menu.Draw.DrawAA then DrawCircle(myHero.x, myHero.y, myHero.z, AA.range, 0xFFFF0000)	end
 	if Menu.Draw.DrawQ then DrawCircle(myHero.x, myHero.y, myHero.z, Q.range, 0xFF9c00ff) end
 	if Menu.Draw.DrawW then DrawCircle(myHero.x, myHero.y, myHero.z, W.range, 0xFF0024ff) end
-	if Menu.Draw.DrawE then DrawCircle(myHero.x, myHero.y, myHero.z, E.range, 0xFF00ff0c) end
+	if Menu.Draw.DrawE then DrawCircle(myHero.x, myHero.y, myHero.z, E.range, 0xFF00ff0c) end	
 	if Menu.Draw.DrawR then DrawCircle(myHero.x, myHero.y, myHero.z, R.range, 0xFFffcc00) end
 	if Menu.Draw.DrawQE then DrawCircle(myHero.x, myHero.y, myHero.z, QE.range, 0xFFFF0000) end
 	if Menu.Misc.SC then
@@ -175,11 +182,18 @@ function OnProcessSpell(object, spell)
 end
 
 function OnTick()
-	Check()
-	QTarget=Target()
-	KillTarget=KTarget()
+	Check()	
+	QTarget=Target(QTS)
+	WTarget=Target(WTS)
+	ETarget=Target(ETS)
+	RTarget=Target(RTS)
+	KTarget=Target(KTS)
+	QETarget=Target(QETS)
+	ITarget=Target(InterTS)
 	KillSteal()
-	if Menu.Misc.QESturn then if Q.ready and E.ready and ValidTarget(Target(), QE.range) then QEcombo() end end
+
+	if Menu.Misc.inter then Interrupt() end
+	if Menu.Misc.QESturn then if Q.ready and E.ready and ValidTarget(QETarget, QE.range) then QEcombo() end end
 	if Menu.KeySet.ComboKey then Combo() end
 	if Menu.KeySet.HarassKey then Harass() end
 	if Menu.KeySet.LaneClearKey then LaneClear() end
@@ -217,21 +231,21 @@ function Combo()
 	if QTarget == nil then return end
 
 	local pos, info, hitchance
-	if Q.ready and E.ready and Menu.Combo.UseQ and Menu.Combo.UseE and ValidTarget(Target(), QE.range) then
+	if Q.ready and E.ready and Menu.Combo.UseQ and Menu.Combo.UseE and ValidTarget(QETarget, QE.range) then
 		QEcombo()
 	end		
 	
-	if Q.ready and Menu.Combo.UseQ and ValidTarget(Target(), Q.range) then
-		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
+	if Q.ready and Menu.Combo.UseQ and ValidTarget(QTarget, Q.range) then
+		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width/2, Q.range, math.huge)
 		CastSpell(_Q, pos.x, pos.z)
 	end
 
-	if W.ready and Menu.Combo.UseW and ValidTarget(Target(), W.range) then		
-		UseSpellW(QTarget)
+	if W.ready and Menu.Combo.UseW and ValidTarget(WTarget, W.range) then		
+		UseSpellW(WTarget)
 	end
 
-	if R.ready and Menu.Combo.UseR and ValidTarget(Target(), R.range) then		
-		UseSpellR(QTarget)		
+	if R.ready and Menu.Combo.UseR and ValidTarget(KTarget, R.range) then
+		UseSpellR(KTarget)		
 	end
 end
 
@@ -240,33 +254,33 @@ function Harass()
 	if QTarget == nil then return end
 
 	local pos, info, hitchance
-	if Q.ready and E.ready and Menu.Harass.UseQ and Menu.Harass.UseE and ValidTarget(Target(), QE.range) then
+	if Q.ready and E.ready and Menu.Harass.UseQ and Menu.Harass.UseE and ValidTarget(QETarget, QE.range) then
 		QEcombo()
 	end		
 	
-	if Q.ready and Menu.Harass.UseQ and ValidTarget(Target(), Q.range) then
-		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
+	if Q.ready and Menu.Harass.UseQ and ValidTarget(QTarget, Q.range) then
+		pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width/2, Q.range, math.huge)
 		CastSpell(_Q, pos.x, pos.z)
 	end
 
-	if W.ready and Menu.Harass.UseW and ValidTarget(Target(), W.range) then
-		UseSpellW(QTarget)
+	if W.ready and Menu.Harass.UseW and ValidTarget(WTarget, W.range) then
+		UseSpellW(WTarget)
 	end
 
-	if R.ready and Menu.Harass.UseR and ValidTarget(Target(), R.range) then		
-		UseSpellR(QTarget)
+	if R.ready and Menu.Harass.UseR and ValidTarget(KTarget, R.range) then		
+		UseSpellR(KTarget)
 	end
 end
 
 function QEcombo()
-	if ValidTarget(Target(), Q.range) then
-			pos, hitchance = VP:GetCircularCastPosition(QTarget, Q.delay, Q.width, Q.range, math.huge)
+	if ValidTarget(QETarget, Q.range) then
+			pos, hitchance = VP:GetCircularCastPosition(QETarget, Q.delay, Q.width/2, Q.range, math.huge)
 			CastSpell(_Q, pos.x, pos.z)			
 			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
 			qetime=os.clock()
 			
 		else
-			pos, hitchance = VP:GetCircularCastPosition(QTarget, QE.delay, QE.width, QE.range, math.huge)
+			pos, hitchance = VP:GetCircularCastPosition(QETarget, QE.delay, QE.width/2, QE.range, math.huge)
 			QPos = myHero+(Vector(QTarget)-myHero):normalized()*700
 			CastSpell(_Q, QPos.x, QPos.z)
 			DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
@@ -309,12 +323,12 @@ function UseSpellW(t)
 		end
 	end
 	if w_cnt==1 then
-		if t==QTarget and ValidTarget(QTarget, W.range) then
-			pos, hitchance = VP:GetCircularCastPosition(QTarget, W.delay, W.width, W.range, math.huge)
+		if t==WTarget and ValidTarget(WTarget, W.range) then
+			pos, hitchance = VP:GetCircularCastPosition(WTarget, W.delay, W.width/2, W.range, math.huge)
 			CastSpell(_W, pos.x, pos.z)
 		end
-		if t==KillTarget and ValidTarget(KillTarget, W.range) then
-			pos, hitchance = VP:GetCircularCastPosition(KillTarget, W.delay, W.width, W.range, math.huge)
+		if t==KTarget and ValidTarget(KTarget, W.range) then
+			pos, hitchance = VP:GetCircularCastPosition(KTarget, W.delay, W.width/2, W.range, math.huge)
 			CastSpell(_W, pos.x, pos.z)
 		end
 	end
@@ -327,44 +341,44 @@ function UseSpellR(t)
 			CastSpell(_R, QTarget)
 		end
 	end
-	if t==KillTarget then
-		lastRDMG = (100/(100+KillTarget.magicArmor-(KillTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueRDMG)	
-		if KillTarget.health < lastRDMG then
-			CastSpell(_R, KillTarget)
+	if t==KTarget then
+		lastRDMG = (100/(100+KTarget.magicArmor-(KTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueRDMG)	
+		if KTarget.health < lastRDMG then
+			CastSpell(_R, KTarget)
 		end
 	end
 end
 
 function KillSteal()
 	if myHero.dead then return end
-	if KillTarget == nil then return end	
-	if Menu.KillSteal.UseQ and Q.ready and ValidTarget(KTarget(), Q.range) then
-		lastQDMG = (100/(100+KillTarget.magicArmor-(KillTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueQDMG)
-		pos, hitchance = VP:GetCircularCastPosition(KillTarget, Q.delay, Q.width, Q.range, math.huge)
-		if KillTarget.health<lastQDMG then
+	if KTarget == nil then return end	
+	if Menu.KillSteal.UseQ and Q.ready and ValidTarget(KTarget, Q.range) then
+		lastQDMG = (100/(100+KTarget.magicArmor-(KTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueQDMG)
+		pos, hitchance = VP:GetCircularCastPosition(KTarget, Q.delay, Q.width/2, Q.range, math.huge)
+		if KTarget.health<lastQDMG then
 			CastSpell(_Q, pos.x, pos.z)
 		end
 	end
-	if Menu.KillSteal.UseW and W.ready and ValidTarget(KTarget(), W.range) then
-		lastWDMG = (100/(100+KillTarget.magicArmor-(KillTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueWDMG)
-		pos, hitchance = VP:GetCircularCastPosition(KillTarget, W.delay, W.width, W.range, math.huge)
-		if KillTarget.health<lastWDMG then
-			UseSpellW(KillTarget)
+	if Menu.KillSteal.UseW and W.ready and ValidTarget(KTarget, W.range) then
+		lastWDMG = (100/(100+KTarget.magicArmor-(KTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueWDMG)
+		pos, hitchance = VP:GetCircularCastPosition(KTarget, W.delay, W.width/2, W.range, math.huge)
+		if KTarget.health<lastWDMG then
+			UseSpellW(KTarget)
 		end
 	end
-	if Menu.KillSteal.UseE and E.ready and  ValidTarget(KTarget(), E.range) then
-		lastEDMG = (100/(100+KillTarget.magicArmor-(KillTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueEDMG)
-		pos, hitchance = VP:GetCircularCastPosition(KillTarget, E.delay, E.width, E.range, math.huge)
-		if KillTarget.health<lastEDMG then
+	if Menu.KillSteal.UseE and E.ready and  ValidTarget(KTarget, E.range) then
+		lastEDMG = (100/(100+KTarget.magicArmor-(KTarget.magicArmor*MagicPenPercent+MagicPen)))*(trueEDMG)
+		pos, hitchance = VP:GetCircularCastPosition(KTarget, E.delay, E.width/2, E.range, math.huge)
+		if KTarget.health<lastEDMG then
 			CastSpell(_E, pos.x, pos.z)
 			etime=os.clock()
 		end
 	end
-	if Menu.KillSteal.UseR and R.ready and  ValidTarget(KTarget(), R.range) then
-		UseSpellR(KillTarget)
+	if Menu.KillSteal.UseR and R.ready and  ValidTarget(KTarget, R.range) then
+		UseSpellR(KTarget)
 	end
-	if Menu.KillSteal.UseIgnite and I.ready and ValidTarget(Target(), 600) and (KillTarget.health < igniteDMG) then
-		CastSpell(Ignite, KillTarget)
+	if Menu.KillSteal.UseIgnite and I.ready and ValidTarget(KTarget, 600) and (KTarget.health < igniteDMG) then
+		CastSpell(Ignite, KTarget)
 	end
 end
 
@@ -405,16 +419,16 @@ function LaneClear()
 	end
 end
 
-function Target() 
-	TS:update() 
-	if TS.target then 
-		return TS.target 
-	end 
-end
+function Target(a) a:update() if a.target then return a.target end end
 
-function KTarget()
-	KTS:update() 
-	if KTS.target then 
-		return KTS.target 
-	end 
+function Interrupt()
+	if Q.ready and E.ready and ValidTarget(ITarget, autoE.range) then 
+		pos, hitchance = VP:GetCircularCastPosition(ITarget, Q.delay, Q.width/2, autoE.range, math.huge)
+		CastSpell(_Q, pos.x, pos.z)			
+		DelayAction(function() CastSpell(_E, pos.x, pos.z) end, 0.25)
+		qetime=os.clock()
+	elseif  not Q.ready and E.ready and ValidTarget(ITarget, autoE.range) then 
+		pos, hitchance = VP:GetCircularCastPosition(ITarget, E.delay, E.width/2, autoE.range, math.huge)
+		CastSpell(_E, pos.x, pos.z)
+	end
 end
