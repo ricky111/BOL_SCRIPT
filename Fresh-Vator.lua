@@ -59,7 +59,7 @@ function OnLoad()
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then 
 		if Menu.Language.Language==1 then
 			Menu:addSubMenu("점화", "ignite")
-				Menu.ignite:addParam("autouse", "자동점화", SCRIPT_PARAM_ONOFF, true)
+				Menu.ignite:addParam("autouse", "자동사용", SCRIPT_PARAM_ONOFF, true)
 		else
 			Menu:addSubMenu("ignite", "ignite")
 				Menu.ignite:addParam("autouse", "Auto Use", SCRIPT_PARAM_ONOFF, true)
@@ -69,7 +69,7 @@ function OnLoad()
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite") then 
 		if Menu.Language.Language==1 then
 			Menu:addSubMenu("강타", "smite")
-				Menu.smite:addParam("autouse", "자동강타", SCRIPT_PARAM_ONKEYTOGGLE,true,GetKey('G'))				
+				Menu.smite:addParam("autouse", "자동사용", SCRIPT_PARAM_ONKEYTOGGLE,true,GetKey('G'))				
 				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
 				Menu.smite:addParam("smite0", "대상: 챔피언 CC", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("smite00", "대상: 챔피언 막타", SCRIPT_PARAM_ONOFF, true)
@@ -112,20 +112,10 @@ end
 
 function OnTick()	
 	if myHero.dead then return end
-	Check()
-	if (myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot")) and Menu.ignite.autouse then
-		if KTarget == nil then return end	
-		if ValidTarget(KTarget, 600) and (KTarget.health < igniteDMG) then
-			if Left.name == "summonerdot" then
-				CastSpell(SUMMONER_1, KTarget)
-			else
-				CastSpell(SUMMONER_2, KTarget)
-			end			
-		end
-	end
+	Check()	
 
-	if (myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite")) and Menu.smite.autouse then
-		for i, junglemob in pairs(JungleMobs.objects) do
+	if (myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite")) and Menu.smite.autouse then		
+		for i, junglemob in pairs(JungleMobs.objects) do			
 			if junglemob == nil then
 				return
 			end
@@ -257,6 +247,17 @@ function OnTick()
 			end
 		end
 	end
+
+	if (myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot")) and Menu.ignite.autouse then				
+		if KTarget == nil then return end	
+		if ValidTarget(KTarget, 600) and (KTarget.health < igniteDMG) then
+			if Left.name == "summonerdot" then
+				CastSpell(SUMMONER_1, KTarget)
+			else
+				CastSpell(SUMMONER_2, KTarget)
+			end			
+		end
+	end
 end
 
 
@@ -266,15 +267,15 @@ end
 
 
 local mybuff={
-	[1]={add=false, name="Stun", clock=nil}, -- 횂쩍횂쨘짚횚짚쩐짚횋짚쨘짚횚짚쩐짚횎짚짧 pass
-	[2]={add=false, name="taunt", clock=nil}, -- 횂쨉횂쨉횂쨔짚횚짚쩐짚횏짚징
-	[3]={add=false, name="slow", clock=nil}, -- 횂쩍횂쩍횂쨌짚횚짚쩐짚횎짚짠횂쩔횄짭 pass
-	[4]={add=false, name="root", clock=nil}, -- 횂쩌짚횚짚쩐짚횎짚짰횂쨔짚횚짚쩐짚횎짚쨘
-	[5]={add=false, name="fear", clock=nil}, -- 횂째횄쨍짚횚짚쩐짚횋짚쨩횄쨌
-	[6]={add=false, name="charm", clock=nil}, --횂쨍짚횚짚쩐짚횋짚쨘짚횚짚쩐짚횋짚쩍횂짚
-	[7]={add=false, name="suppress", clock=nil}, --횂쨔횂짬횄짜짚횚짚쩐짚횋짚쩌짚횚짚쩐짚횎짚쨋짚횚짚쩐짚횋짚짼횂짝
-	[8]={add=false, name="flee", clock=nil}, -- 횂쨉횂쨉횂쨍짚횚짚쩐짚횋짚짼
-	[9]={add=false, name="knockup", clock=nil} --횂쩔횂징횂쩐횄짰횂쨘횂쨩
+	[1]={add=false, name="Stun", clock=nil}, 
+	[2]={add=false, name="taunt", clock=nil}, 
+	[3]={add=false, name="slow", clock=nil}, 
+	[4]={add=false, name="root", clock=nil},
+	[5]={add=false, name="fear", clock=nil}, 
+	[6]={add=false, name="charm", clock=nil},
+	[7]={add=false, name="suppress", clock=nil}, 
+	[8]={add=false, name="flee", clock=nil}, 
+	[9]={add=false, name="knockup", clock=nil} 
 }
 
 function OnGainBuff(unit, buff)	
