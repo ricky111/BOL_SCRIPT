@@ -16,22 +16,25 @@ else
 	end	
 end
 
-KTS = TargetSelector(TARGET_LOW_HP, 760, DAMAGE_MAGIC, false) KTarget=nil
+KTS = TargetSelector(TARGET_LOW_HP, 730, DAMAGE_MAGIC, false) KTarget=nil STarget=nil
+STS = TargetSelector(TARGET_LESS_CAST_PRIORITY, 730, DAMAGE_PHYSICAL, false)
 
 SpellType = {
-	[1]={name="summonerdot", add=true, range=600, kname="점화"},	
+	[1]={name="summonerdot", add=true, range=560, kname="점화"},	
 	[2]={name="summonerflash", add=false, range=400, kname="점멸"},	
 	[3]={name="summonerheal", add=true, range=800, kname="회복"},	
 	[4]={name="summonerbarrier", add=true, range=0, kname="방어막"},	
 	[5]={name="summonermana", add=true, range=0, kname="총명"},	
 	[6]={name="summonerboost", add=true, range=0, kname="정화"},	
-	[7]={name="summonersmite", add=true, range=760, kname="강타"},	
+	[7]={name="summonersmite", add=true, range=700, kname="강타"},	
 	[8]={name="summonerexhaust", add=true, range=650, kname="탈진"}
 }
 Left = myHero:GetSpellData(SUMMONER_1) Right = myHero:GetSpellData(SUMMONER_2) JungleMobs = minionManager(MINION_JUNGLE, 760, player, MINION_SORT_MAXHEALTH_DEC)
-
-for i=1, 8, 1 do 	if Left.name == SpellType[i].name then Left = SpellType[i] break end end
-for i=1, 8, 1 do 	if Right.name == SpellType[i].name then Right = SpellType[i] break end end
+print(Left.name)
+for i=1, 8, 1 do if Left.name == SpellType[i].name then Left = SpellType[i] break end end
+for i=1, 8, 1 do if Right.name == SpellType[i].name then Right = SpellType[i] break end end
+if Left.name == "s5_summonersmiteplayerganker" or Left.name == "s5_summonersmiteduel" then Left=SpellType[7] end
+if Right.name == "s5_summonersmiteplayerganker" or Right.name == "s5_summonersmiterduel" then Right=SpellType[7] end
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -96,6 +99,29 @@ function OnLoad()
 		else
 			Menu:addSubMenu("smite", "smite")
 				Menu.smite:addParam("autouse", "Auto Use", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
+				Menu.smite:addParam("smite0", "Object: Champion CC", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite00", "Object: Champion LastHit", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
+				Menu.smite:addParam("smite1", "Baron", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite2", "Dragon", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite3", "Crab(Baron/Dragon)", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
+				Menu.smite:addParam("smite4", "Full Blue Camp", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite5", "Red", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite6", "Blue", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite7", "Gromp", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite8", "Wolf", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite9", "Beak", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite10", "Krug", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
+				Menu.smite:addParam("smite11", "Full Red Camp", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite12", "Red", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite13", "Blue", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite14", "Gromp", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite15", "Wolf", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite16", "Beak", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite17", "Krug", SCRIPT_PARAM_ONOFF, true)
 		end
 	end
 end
@@ -114,13 +140,27 @@ function OnTick()
 	if myHero.dead then return end
 	Check()	
 
-	if (myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite")) and Menu.smite.autouse then		
+	if (myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite")) and Menu.smite.autouse then				
+		if Menu.smite.smite00 and ValidTarget(KTarget, 710) and (KTarget.health < bluesmiteDMG) then
+			if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
+				CastSpell(SUMMONER_1, KTarget)
+			else
+				CastSpell(SUMMONER_2, KTarget)
+			end
+		end
+		if Menu.smite.smite0 and ValidTarget(STarget, 710) then
+			if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
+				CastSpell(SUMMONER_1, STarget)
+			else
+				CastSpell(SUMMONER_2, STarget)
+			end
+		end
 		for i, junglemob in pairs(JungleMobs.objects) do			
 			if junglemob == nil then
 				return
 			end
 			--print(junglemob.name)
-			if ValidTarget(junglemob, 760) then
+			if ValidTarget(junglemob, 720) then
 				if Menu.smite.smite1 and junglemob.name=="SRU_Baron12.1.1" and junglemob.health < smiteDMG then
 					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
 						CastSpell(SUMMONER_1, junglemob)
@@ -249,8 +289,8 @@ function OnTick()
 	end
 
 	if (myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot")) and Menu.ignite.autouse then				
-		if KTarget == nil then return end	
-		if ValidTarget(KTarget, 600) and (KTarget.health < igniteDMG) then
+		if KTarget == nil then return end			
+		if ValidTarget(KTarget, 570) and (KTarget.health < igniteDMG) then
 			if Left.name == "summonerdot" then
 				CastSpell(SUMMONER_1, KTarget)
 			else
@@ -289,7 +329,7 @@ end
 
 function Check()	
 	if (myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite")) and Menu.smite.autouse then
-		if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then Left.range=760 else Right.range=760 end
+		if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then Left.range=700 else Right.range=700 end
 	end
 	if (myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite")) and not Menu.smite.autouse then
 		if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then Left.range=0 else Right.range=0 end
@@ -308,9 +348,11 @@ function Check()
 		if myHero.level > 0 then smiteDMG = 370 + ((myHero.level)*20) end
 		bluesmiteDMG = 20+8*myHero.level
 		JungleMobs:update()
+		STarget = Target(S)		
 	end	
 end
 
 function Target(spell) 
 	if spell==K then KTS:update() if KTS.target then return KTS.target end end
+	if spell==S then STS:update() if STS.target then return STS.target end end
 end
