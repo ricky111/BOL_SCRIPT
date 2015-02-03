@@ -186,6 +186,7 @@ function OnDraw()
 end
 
 function OnTick()
+	if myHero.dead then return end
 	Check()
 	QTarget=Target(Q)
 	WTarget=Target(W)
