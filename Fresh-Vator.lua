@@ -21,7 +21,7 @@ KTS = TargetSelector(TARGET_LOW_HP, 760, DAMAGE_MAGIC, false) KTarget=nil
 SpellType = {
 	[1]={name="summonerdot", add=true, range=600, kname="점화"},	
 	[2]={name="summonerflash", add=false, range=400, kname="점멸"},	
-	[3]={name="summonerheal", add=true, range=700, kname="회복"},	
+	[3]={name="summonerheal", add=true, range=800, kname="회복"},	
 	[4]={name="summonerbarrier", add=true, range=0, kname="방어막"},	
 	[5]={name="summonermana", add=true, range=0, kname="총명"},	
 	[6]={name="summonerboost", add=true, range=0, kname="정화"},	
@@ -58,8 +58,8 @@ function OnLoad()
 
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then 
 		if Menu.Language.Language==1 then
-			Menu:addSubMenu("짚횚짚쩐짚횋짚짼횂징짚횚짚쩐짚횋짚쩍횂짯", "ignite")
-				Menu.ignite:addParam("autouse", "짚횚짚쩐짚횎짚쨘횂쨉횂쩔횂쨩횄짠횂쩔횄짬", SCRIPT_PARAM_ONOFF, true)
+			Menu:addSubMenu("점화", "ignite")
+				Menu.ignite:addParam("autouse", "자동점화", SCRIPT_PARAM_ONOFF, true)
 		else
 			Menu:addSubMenu("ignite", "ignite")
 				Menu.ignite:addParam("autouse", "Auto Use", SCRIPT_PARAM_ONOFF, true)
@@ -68,31 +68,31 @@ function OnLoad()
 
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite") then 
 		if Menu.Language.Language==1 then
-			Menu:addSubMenu("횂째횂짯짚횚짚쩐짚횋짚쨘횂쨍", "smite")
-				Menu.smite:addParam("autouse", "짚횚짚쩐짚횎짚쨘횂쨉횂쩔횂쨩횄짠횂쩔횄짬", SCRIPT_PARAM_ONKEYTOGGLE,true,GetKey('G'))				
+			Menu:addSubMenu("강타", "smite")
+				Menu.smite:addParam("autouse", "자동강타", SCRIPT_PARAM_ONKEYTOGGLE,true,GetKey('G'))				
 				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
-				Menu.smite:addParam("smite0", "횄쨩 짚횚짚쩐짚횋짚쨋횂짢짚횚짚쩐짚횋짚쩌짚횚짚쩐짚횋짚쩌횂쩐횄째 CC", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite00", "횄쨩 짚횚짚쩐짚횋짚쨋횂짢짚횚짚쩐짚횋짚쩌짚횚짚쩐짚횋짚쩌횂쩐횄째 횂쨍횂쨌짚횚짚쩐짚횋짚쨘횂쨍", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite0", "대상: 챔피언 CC", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite00", "대상: 챔피언 막타", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
-				Menu.smite:addParam("smite1", "횂쨔짚횚짚쩐짚횎짚쨍횂쨌짚횚짚쩐짚횎짚짬", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite2", "횂쨉횄짜횂쨌횂징횂째횄짱", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite3", "횂째횂쨀횂짹횂쨍횂쨍횂짰(횂쨔짚횚짚쩐짚횎짚쨍횂쨌짚횚짚쩐짚횎짚짬/횂쨉횄짜횂쨌횂징횂째횄짱)", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite1", "바론", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite2", "드래곤", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite3", "가재(바론/드래곤)", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
-				Menu.smite:addParam("smite4", "횂쨘횄짯횂쨌횄짠짚횚짚쩐짚횋짚짼횄쨍횂쩔횂쨉 횄쩌짚횚짚쩐짚횋짚쨋횂쩌", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite5", "횂쨌횂쨔횂쨉횄짜", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite6", "횂쨘횄짯횂쨌횄짠", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite7", "횂쨉짚횚짚쩐짚횎짚짠횂짼횂짢횂쨘횄짹", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite8", "횂쨈짚횚짚쩐짚횋짚짼횂쨈횄짬", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite9", "횂쨉횂쨋횂쩌횄쨋횂쨍횂짰", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite10", "횂째횄짹횂쨌횂쩍", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite4", "블루진영 전체", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite5", "레드", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite6", "블루", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite7", "두꺼비", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite8", "늑대", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite9", "독수리", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite10", "골램", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
-				Menu.smite:addParam("smite11", "횂쨌횂쨔횂쨉횄짜짚횚짚쩐짚횋짚짼횄쨍횂쩔횂쨉 횄쩌짚횚짚쩐짚횋짚쨋횂쩌", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite12", "횂쨌횂쨔횂쨉횄짜", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite13", "횂쨘횄짯횂쨌횄짠", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite14", "횂쨉짚횚짚쩐짚횎짚짠횂짼횂짢횂쨘횄짹", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite15", "횂쨈짚횚짚쩐짚횋짚짼횂쨈횄짬", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite16", "횂쨉횂쨋횂쩌횄쨋횂쨍횂짰", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite17", "횂째횄짹횂쨌횂쩍", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite11", "레드진영 전체", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite12", "레드", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite13", "블루", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite14", "두꺼비", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite15", "늑대", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite16", "독수리", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite17", "골램", SCRIPT_PARAM_ONOFF, true)
 		else
 			Menu:addSubMenu("smite", "smite")
 				Menu.smite:addParam("autouse", "Auto Use", SCRIPT_PARAM_ONOFF, true)
@@ -279,10 +279,8 @@ local mybuff={
 
 function OnGainBuff(unit, buff)	
 	if unit.isMe then
-		for i=1, 9, 1 do
-			--print(buff.name.." // "..mybuff[i].name)
-			if buff.name==mybuff[i].name then
-				--print(mybuff[i].name.."횂쨔횄쨋짚횚짚쩐짚횋짚쩌짚횚짚쩐짚횋짚짼짚횚짚쩐짚횎짚짧짚횚짚쩐짚횋짚쨍횂징")
+		for i=1, 9, 1 do			
+			if buff.name==mybuff[i].name then				
 			end
 		end
 	end
