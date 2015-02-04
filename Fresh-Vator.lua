@@ -1,4 +1,4 @@
-ver = "1.001"
+ver = "1.0"
 
 Host = "raw.github.com"
 ServerPath = "/KorFresh/BOL_SCRIPT/master/Vator.stats".."?rand="..math.random(1,10000)
@@ -30,11 +30,12 @@ SpellType = {
 	[8]={name="summonerexhaust", add=true, range=600, kname="탈진"}
 }
 Left = myHero:GetSpellData(SUMMONER_1) Right = myHero:GetSpellData(SUMMONER_2) JungleMobs = minionManager(MINION_JUNGLE, 760, player, MINION_SORT_MAXHEALTH_DEC)
---print(Left.name)
+print(Left.name.." / "..Right.name)
 for i=1, 8, 1 do if Left.name == SpellType[i].name then Left = SpellType[i]  break end end
 for i=1, 8, 1 do if Right.name == SpellType[i].name then Right = SpellType[i] break end end
 if Left.name == "s5_summonersmiteplayerganker" or Left.name == "s5_summonersmiteduel" then Left=SpellType[7] end
 if Right.name == "s5_summonersmiteplayerganker" or Right.name == "s5_summonersmiterduel" then Right=SpellType[7] end
+print("Last:: "..Left.name.." / "..Right.name)
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,6 +59,18 @@ function OnLoad()
 				Menu.Draw:addParam("rightspell", Right.name, SCRIPT_PARAM_ONOFF, true)
 			end
 		end
+
+	if myHero:GetSpellData(SUMMONER_1).name:find("summonerheal") or myHero:GetSpellData(SUMMONER_2).name:find("summonerheal") then 
+		if Menu.Language.Language==1 then
+			Menu:addSubMenu("회복", "heal")
+				Menu.heal:addParam("autouse", "자동사용", SCRIPT_PARAM_ONOFF, true)				
+				Menu.heal:addParam("healrate", "나/아군 체력 %이하", SCRIPT_PARAM_SLICE, 15, 0, 100)
+		else
+			Menu:addSubMenu("heal", "heal")
+				Menu.heal:addParam("autouse", "Auto Use", SCRIPT_PARAM_ONOFF, true)
+				Menu.heal:addParam("healrate", "Me/Team Health % Below", SCRIPT_PARAM_SLICE, 15, 0, 100)
+		end
+	end
 
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerexhaust") or myHero:GetSpellData(SUMMONER_2).name:find("summonerexhaust") then 
 		if Menu.Language.Language==1 then
@@ -84,8 +97,7 @@ function OnLoad()
 				Menu.ignite:addParam("autouse", "Auto Use", SCRIPT_PARAM_ONOFF, true)
 		end
 	end
-
-	if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite") then 
+	if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite") then 			
 		if Menu.Language.Language==1 then
 			Menu:addSubMenu("강타", "smite")
 				Menu.smite:addParam("autouse", "자동사용", SCRIPT_PARAM_ONKEYTOGGLE,true,GetKey('G'))				
