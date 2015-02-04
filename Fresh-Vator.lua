@@ -30,7 +30,7 @@ SpellType = {
 	[8]={name="summonerexhaust", add=true, range=600, kname="탈진"}
 }
 Left = myHero:GetSpellData(SUMMONER_1) Right = myHero:GetSpellData(SUMMONER_2) JungleMobs = minionManager(MINION_JUNGLE, 760, player, MINION_SORT_MAXHEALTH_DEC)
-print(Left.name)
+--print(Left.name)
 for i=1, 8, 1 do if Left.name == SpellType[i].name then Left = SpellType[i]  break end end
 for i=1, 8, 1 do if Right.name == SpellType[i].name then Right = SpellType[i] break end end
 if Left.name == "s5_summonersmiteplayerganker" or Left.name == "s5_summonersmiteduel" then Left=SpellType[7] end
