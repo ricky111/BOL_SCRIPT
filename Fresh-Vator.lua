@@ -1,4 +1,4 @@
-ver = "1.0"
+ver = "1.001"
 
 Host = "raw.github.com"
 ServerPath = "/KorFresh/BOL_SCRIPT/master/Vator.stats".."?rand="..math.random(1,10000)
@@ -27,11 +27,11 @@ SpellType = {
 	[5]={name="summonermana", add=true, range=0, kname="총명"},	
 	[6]={name="summonerboost", add=true, range=0, kname="정화"},	
 	[7]={name="summonersmite", add=true, range=700, kname="강타"},	
-	[8]={name="summonerexhaust", add=true, range=650, kname="탈진"}
+	[8]={name="summonerexhaust", add=true, range=600, kname="탈진"}
 }
 Left = myHero:GetSpellData(SUMMONER_1) Right = myHero:GetSpellData(SUMMONER_2) JungleMobs = minionManager(MINION_JUNGLE, 760, player, MINION_SORT_MAXHEALTH_DEC)
 print(Left.name)
-for i=1, 8, 1 do if Left.name == SpellType[i].name then Left = SpellType[i] break end end
+for i=1, 8, 1 do if Left.name == SpellType[i].name then Left = SpellType[i]  break end end
 for i=1, 8, 1 do if Right.name == SpellType[i].name then Right = SpellType[i] break end end
 if Left.name == "s5_summonersmiteplayerganker" or Left.name == "s5_summonersmiteduel" then Left=SpellType[7] end
 if Right.name == "s5_summonersmiteplayerganker" or Right.name == "s5_summonersmiterduel" then Right=SpellType[7] end
@@ -44,20 +44,36 @@ function OnLoad()
 	Menu:addSubMenu("Language", "Language")
 		Menu.Language:addParam("Language", "Language", SCRIPT_PARAM_LIST, 2, { "Korean", "English"})
 	Menu:addSubMenu("Draw", "Draw")
-		if Left.add then
+		if Left then
 			if Menu.Language.Language==1 then
 				Menu.Draw:addParam("leftspell", Left.kname, SCRIPT_PARAM_ONOFF, true)
 			else
 				Menu.Draw:addParam("leftspell", Left.name, SCRIPT_PARAM_ONOFF, true)
 			end
 		end
-		if Right.add then
+		if Right then
 			if Menu.Language.Language==1 then
 				Menu.Draw:addParam("rightspell", Right.kname, SCRIPT_PARAM_ONOFF, true)
 			else
 				Menu.Draw:addParam("rightspell", Right.name, SCRIPT_PARAM_ONOFF, true)
 			end
 		end
+
+	if myHero:GetSpellData(SUMMONER_1).name:find("summonerexhaust") or myHero:GetSpellData(SUMMONER_2).name:find("summonerexhaust") then 
+		if Menu.Language.Language==1 then
+			Menu:addSubMenu("탈진", "exhaust")
+				Menu.exhaust:addParam("autouse", "자동사용", SCRIPT_PARAM_ONKEYDOWN,false,32)
+				for i, enemy in ipairs(GetEnemyHeroes()) do
+					Menu.exhaust:addParam(enemy.hash, enemy.charName, SCRIPT_PARAM_ONOFF, true)
+				end
+		else
+			Menu:addSubMenu("exhaust", "exhaust")
+				Menu.exhaust:addParam("autouse", "Auto Use", SCRIPT_PARAM_ONKEYDOWN,false,32)
+				for i, enemy in ipairs(GetEnemyHeroes()) do
+					Menu.exhaust:addParam(enemy.hash, enemy.charName, SCRIPT_PARAM_ONOFF, true)
+				end
+		end
+	end
 
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then 
 		if Menu.Language.Language==1 then
@@ -128,19 +144,42 @@ end
 
 function OnDraw()
 	if myHero.dead then return end
-	if Menu.Draw.leftspell then		
+	if Menu.Draw.leftspell then
 		DrawCircle3D(myHero.x, myHero.y, myHero.z, Left.range, 1, ARGB(200, 0, 255, 0), 50)
 	end
-	if Menu.Draw.rightspell then				
-		DrawCircle3D(myHero.x, myHero.y, myHero.z, Right.range, 1, ARGB(200, 255, 0, 0), 50)		
+	if Menu.Draw.rightspell then
+		DrawCircle3D(myHero.x, myHero.y, myHero.z, Right.range, 1, ARGB(200, 255, 0, 0), 50)	
 	end
 end
 
-function OnTick()	
+function OnTick()
 	if myHero.dead then return end
-	Check()	
+	Check()
 
-	if (myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite")) and Menu.smite.autouse then				
+	if (myHero:GetSpellData(SUMMONER_1).name:find("summonerexhaust") or myHero:GetSpellData(SUMMONER_2).name:find("summonerexhaust")) and Menu.exhaust.autouse then
+		last_enemy=nil
+		for i, enemy in ipairs(GetEnemyHeroes()) do
+			if ValidTarget(enemy, 600) and Menu.exhaust[enemy.hash] then
+				if enemy.ap>(enemy.totalDamage*2) then dmg = enemy.ap else dmg = enemy.totalDamage end
+				first_enemy = enemy
+				first_dmg=dmg				
+				if not last_enemy then last_enemy=first_enemy  last_dmg=dmg end
+				if first_dmg > last_dmg then
+					last_enemy = first_enemy
+					last_dmg = first_dmg	
+				end				
+			end
+		end
+		if ValidTarget(last_enemy, 600) then
+			if myHero:GetSpellData(SUMMONER_1).name:find("summonerexhaust") then
+				CastSpell(SUMMONER_1, last_enemy)
+			else
+				CastSpell(SUMMONER_2, last_enemy)
+			end
+		end
+	end
+
+	if (myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite")) and Menu.smite.autouse then
 		if Menu.smite.smite00 and ValidTarget(KTarget, 710) and (KTarget.health < bluesmiteDMG) then
 			if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
 				CastSpell(SUMMONER_1, KTarget)
@@ -354,5 +393,5 @@ end
 
 function Target(spell) 
 	if spell==K then KTS:update() if KTS.target then return KTS.target end end
-	if spell==S then STS:update() if STS.target then return STS.target end end
+	if spell==S then STS:update() if STS.target then return STS.target end end	
 end
