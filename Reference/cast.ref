@@ -1,0 +1,79 @@
+-- check --  
+  ReactionTime = .2+GetLatency()/2000
+  
+  QTargetAddRange = 0
+  QTargetRange = Q.range+Q.radius-Balls.radius
+  QTargetSpeed = 0
+  QReactionTime = ReactionTime+GetLatency()/2000
+  QTargetVisionPos = nil
+  QTargetVisionPosRT = nil
+  
+  if QTarget ~= nil then
+  
+    local AddRange = GetDistance(QTarget.minBBox, QTarget)/2
+    
+    QTargetAddRange = AddRange
+    QTargetRange = Q.range+Q.radius-Balls.radius+AddRange
+    QTargetSpeed = QTarget.ms
+    QReactionTime = math.max(GetLatency()/2000, Q.delay+GetLatency()/2000-(Q.radius+QTargetAddRange)/QTargetSpeed)
+    
+    if QTarget.hasMovePath and QTarget.pathCount >= 2 then
+      QTargetEndPos = QTarget:GetPath(2)
+      
+      if QTarget.pathCount >= 3 then
+        QTargetEndPos = QTarget:GetPath(3)
+      end
+      
+      QTargetVisionPos = QTarget+(Vector(QTargetEndPos)-QTarget):normalized()*QReactionTime*QTargetSpeed
+      QTargetVisionPosRT = QTarget+(Vector(QTargetEndPos)-QTarget):normalized()*ReactionTime*QTargetSpeed
+    end
+    
+  end
+  
+  WTargetAddRange = 0
+  WTargetRange = W.range2+W.radius
+  WTargetSpeed = 0
+  WReactionTime = ReactionTime+GetLatency()/2000
+  WTargetVisionPos = nil
+  WTargetVisionPosRT = nil
+  
+  if WTarget ~= nil then
+    
+    local AddRange = GetDistance(WTarget.minBBox, WTarget)/2
+    
+    WTargetAddRange = AddRange
+    WTargetRange = W.range2+W.radius+AddRange
+    WTargetSpeed = WTarget.ms
+    WReactionTime = math.max(GetLatency()/2000, (GetDistance(WTarget)+200)/W.speed+GetLatency()/2000-(W.radius+WTargetAddRange)/WTargetSpeed)
+    
+    if WTarget.hasMovePath and WTarget.pathCount >= 2 then
+      WTargetEndPos = WTarget:GetPath(2)
+      
+      if WTarget.pathCount >= 3 then
+        WTargetEndPos = WTarget:GetPath(3)
+      end
+      
+      WTargetVisionPos = WTarget+(Vector(WTargetEndPos)-WTarget):normalized()*WReactionTime*WTargetSpeed
+      WTargetVisionPosRT = WTarget+(Vector(WTargetEndPos)-WTarget):normalized()*ReactionTime*WTargetSpeed
+    end
+    
+  end
+  
+--cast--
+  if QTarget == nil then
+    return
+  end
+  
+  local ComboQ = Menu.Combo.Q
+  
+  if Q.ready and ComboQ and ValidTarget(QTarget, QTargetRange) then
+  
+    if (Q.delay+GetLatency()/2000)*QTargetSpeed <= Q.radius+QTargetAddRange and ValidTarget(QTarget, Q.range-Balls.radius) then
+      CastQ(QTarget)
+    elseif QTargetVisionPosRT and (Q.delay-ReactionTime+GetLatency()/2000)*QTargetSpeed <= Q.radius+QTargetAddRange and GetDistance(QTargetVisionPosRT) <= Q.range-Balls.radius then
+      CastQ(QTargetVisionPosRT)
+    elseif QTargetVisionPos and GetDistance(QTargetVisionPos) <= Q.range-Balls.radius then
+      CastQ(QTargetVisionPos)
+    end
+    
+  end
