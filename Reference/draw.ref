@@ -1,0 +1,23 @@
+--[[
+function OnDraw()
+
+  if myHero.hasMovePath and myHero.pathCount >= 2 then
+  
+    local IndexPath = myHero:GetPath(myHero.pathIndex)
+    
+    DrawLine3D(myHero.x, myHero.y, myHero.z, IndexPath.x, IndexPath.y, IndexPath.z, 1, ARGB(255, 255, 255, 255))
+    
+    for i=myHero.pathIndex, myHero.pathCount-1 do
+      
+      local Path = myHero:GetPath(i)
+      local Path2 = myHero:GetPath(i+1)
+      
+      --self.DLine(Vector(myHero:GetPath(i).x, myHero.y, myHero:GetPath(i).y), Vector(myHero:GetPath(i+1).x, myHero.y, myHero:GetPath(i+1).y), ARGB(255, 255, 255, 255))
+      DrawLine3D(Path.x, Path.y, Path.z, Path2.x, Path2.y, Path2.z, 1, ARGB(255, 255, 255, 255))
+    end
+    
+  end
+  
+end
+
+]]
