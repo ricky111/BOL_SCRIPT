@@ -1,6 +1,4 @@
--- If Koreans Please set the language set to EUC-KR 한국인 이라면 언어설정을 EUC-KR 로 설정 해주세요
-
-ver = "1.003"
+ver = "1.002"
 
 Host = "raw.github.com"
 ServerPath = "/KorFresh/BOL_SCRIPT/master/Vator.stats".."?rand="..math.random(1,10000)
@@ -104,7 +102,7 @@ function OnLoad()
 	if spell_boost then
 		if Menu.Language.Language==1 then
 			Menu:addSubMenu("정화", "boost")
-				Menu.boost:addParam("autouse", "자동사용", SCRIPT_PARAM_ONOFF, true)						
+				Menu.boost:addParam("autouse", "자용사용", SCRIPT_PARAM_ONOFF, true)						
 				Menu.boost:addParam("boost", "딜레이(초)", SCRIPT_PARAM_SLICE, 0.5, 0, 1, 2)
 		else
 			Menu:addSubMenu("Boost", "boost")
@@ -173,9 +171,9 @@ function OnLoad()
 				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
 				Menu.smite:addParam("smite1", "바론", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("smite2", "드래곤", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite3", "가재(바론/드래곤)", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite3", "개구리(바론/드래곤)", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
-				Menu.smite:addParam("smite4", "블루진영 전체", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite4", "블루팀 전체", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("smite5", "레드", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("smite6", "블루", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("smite7", "두꺼비", SCRIPT_PARAM_ONOFF, true)
@@ -183,9 +181,9 @@ function OnLoad()
 				Menu.smite:addParam("smite9", "독수리", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("smite10", "골렘", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
-				Menu.smite:addParam("smite11", "레드진영 전체", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite11", "레드팀 전체", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("smite12", "레드", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite13", "블루", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite13", "블루（", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("smite14", "두꺼비", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("smite15", "늑대", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("smite16", "독수리", SCRIPT_PARAM_ONOFF, true)
@@ -463,14 +461,14 @@ KTS = TargetSelector(TARGET_LOW_HP, 730, DAMAGE_MAGIC, false) KTarget=nil STarge
 STS = TargetSelector(TARGET_LESS_CAST_PRIORITY, 730, DAMAGE_PHYSICAL, false)
 
 SpellType = {
-	[1]={name="summonerdot", add=true, range=560, kname="Á¡È­"},	-- success
-	[2]={name="summonerflash", add=false, range=400, kname="Á¡¸ê"},	-- success
-	[3]={name="summonerheal", add=true, range=790, kname="È¸º¹"},	-- success
-	[4]={name="summonerbarrier", add=true, range=0, kname="¹æ¾î¸·"},	-- success
-	[5]={name="summonermana", add=true, range=0, kname="ÃÑ¸í"},	
-	[6]={name="summonerboost", add=true, range=0, kname="Á¤È­"},	
-	[7]={name="summonersmite", add=true, range=700, kname="°­Å¸"},	-- success
-	[8]={name="summonerexhaust", add=true, range=600, kname="Å»Áø"}	-- success
+	[1]={name="summonerdot", add=true, range=560, kname="횁징횊짯"},	-- success
+	[2]={name="summonerflash", add=false, range=400, kname="횁징쨍챗"},	-- success
+	[3]={name="summonerheal", add=true, range=790, kname="횊쨍쨘쨔"},	-- success
+	[4]={name="summonerbarrier", add=true, range=0, kname="쨔챈쩐챤쨍쨌"},	-- success
+	[5]={name="summonermana", add=true, range=0, kname="횄횗쨍챠"},	
+	[6]={name="summonerboost", add=true, range=0, kname="횁짚횊짯"},	
+	[7]={name="summonersmite", add=true, range=700, kname="째짯횇쨍"},	-- success
+	[8]={name="summonerexhaust", add=true, range=600, kname="횇쨩횁첩"}	-- success
 }
 Left = myHero:GetSpellData(SUMMONER_1) Right = myHero:GetSpellData(SUMMONER_2) JungleMobs = minionManager(MINION_JUNGLE, 760, player, MINION_SORT_MAXHEALTH_DEC)
 --print(Left.name)
@@ -532,10 +530,10 @@ function OnLoad()
 			end
 		end
 	if Menu.Language.Language==1 then
-		Menu:addSubMenu("¹°¾à", "posion")
-			Menu.posion:addParam("autouse", "ÀÚµ¿»ç¿ë", SCRIPT_PARAM_ONOFF, true)
-			Menu.posion:addParam("health", "Ã¼·Â % ÀÌÇÏÀÏ ¶§", SCRIPT_PARAM_SLICE, 50, 0, 100)
-			Menu.posion:addParam("mana", "¸¶³ª % ÀÌÇÏÀÏ ¶§", SCRIPT_PARAM_SLICE, 50, 0, 100)
+		Menu:addSubMenu("쨔째쩐횪", "posion")
+			Menu.posion:addParam("autouse", "횣쨉쩔쨩챌쩔챘", SCRIPT_PARAM_ONOFF, true)
+			Menu.posion:addParam("health", "횄쩌쨌횂 % 횑횉횕횕 쨋짠", SCRIPT_PARAM_SLICE, 50, 0, 100)
+			Menu.posion:addParam("mana", "쨍쨋쨀짧 % 횑횉횕횕 쨋짠", SCRIPT_PARAM_SLICE, 50, 0, 100)
 	else
 		Menu:addSubMenu("posion", "posion")
 			Menu.posion:addParam("autouse", "autouse", SCRIPT_PARAM_ONOFF, true)
@@ -544,9 +542,9 @@ function OnLoad()
 	end
 	if spell_boost then
 		if Menu.Language.Language==1 then
-			Menu:addSubMenu("Á¤È­", "boost")
-				Menu.boost:addParam("autouse", "ÀÚµ¿»ç¿ë", SCRIPT_PARAM_ONOFF, true)						
-				Menu.boost:addParam("boost", "µô·¹ÀÌ(ÃÊ)", SCRIPT_PARAM_SLICE, 0.5, 0, 1, 2)
+			Menu:addSubMenu("횁짚횊짯", "boost")
+				Menu.boost:addParam("autouse", "횣쨉쩔쨩챌쩔챘", SCRIPT_PARAM_ONOFF, true)						
+				Menu.boost:addParam("boost", "쨉척쨌쨔횑(횄횎)", SCRIPT_PARAM_SLICE, 0.5, 0, 1, 2)
 		else
 			Menu:addSubMenu("Boost", "boost")
 				Menu.boost:addParam("autouse", "autouse", SCRIPT_PARAM_ONOFF, true)						
@@ -555,9 +553,9 @@ function OnLoad()
 	end
 	if spell_barrier then
 		if Menu.Language.Language==1 then
-			Menu:addSubMenu("¹æ¾î¸·", "barrier")
-				Menu.barrier:addParam("autouse", "ÀÚµ¿»ç¿ë", SCRIPT_PARAM_ONOFF, true)						
-				Menu.barrier:addParam("barrierrate", "Ã¼·Â % ÀÌÇÏÀÏ ¶§", SCRIPT_PARAM_SLICE, 15, 0, 100)
+			Menu:addSubMenu("쨔챈쩐챤쨍쨌", "barrier")
+				Menu.barrier:addParam("autouse", "횣쨉쩔쨩챌쩔챘", SCRIPT_PARAM_ONOFF, true)						
+				Menu.barrier:addParam("barrierrate", "횄쩌쨌횂 % 횑횉횕횕 쨋짠", SCRIPT_PARAM_SLICE, 15, 0, 100)
 		else
 			Menu:addSubMenu("Barrier", "barrier")
 				Menu.barrier:addParam("autouse", "Auto Use", SCRIPT_PARAM_ONOFF, true)				
@@ -567,10 +565,10 @@ function OnLoad()
 
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerheal") or myHero:GetSpellData(SUMMONER_2).name:find("summonerheal") then 
 		if Menu.Language.Language==1 then
-			Menu:addSubMenu("È¸º¹", "heal")
-				Menu.heal:addParam("autouse", "ÀÚµ¿»ç¿ë", SCRIPT_PARAM_ONOFF, true)		
-				Menu.heal:addParam("selheal", "»ç¿ë´ë»ó", SCRIPT_PARAM_LIST, 2, { "³ª¸¸", "¾Æ±º"})		
-				Menu.heal:addParam("healrate", "Ã¼·Â % ÀÌÇÏÀÏ ¶§", SCRIPT_PARAM_SLICE, 15, 0, 100)
+			Menu:addSubMenu("횊쨍쨘쨔", "heal")
+				Menu.heal:addParam("autouse", "횣쨉쩔쨩챌쩔챘", SCRIPT_PARAM_ONOFF, true)		
+				Menu.heal:addParam("selheal", "쨩챌쩔챘쨈챘쨩처", SCRIPT_PARAM_LIST, 2, { "쨀짧쨍쨍", "쩐횈짹쨘"})		
+				Menu.heal:addParam("healrate", "횄쩌쨌횂 % 횑횉횕횕 쨋짠", SCRIPT_PARAM_SLICE, 15, 0, 100)
 		else
 			Menu:addSubMenu("heal", "heal")
 				Menu.heal:addParam("autouse", "Auto Use", SCRIPT_PARAM_ONOFF, true)
@@ -581,8 +579,8 @@ function OnLoad()
 
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerexhaust") or myHero:GetSpellData(SUMMONER_2).name:find("summonerexhaust") then 
 		if Menu.Language.Language==1 then
-			Menu:addSubMenu("Å»Áø", "exhaust")
-				Menu.exhaust:addParam("autouse", "ÀÚµ¿»ç¿ë", SCRIPT_PARAM_ONKEYDOWN,false,32)
+			Menu:addSubMenu("횇쨩횁첩", "exhaust")
+				Menu.exhaust:addParam("autouse", "횣쨉쩔쨩챌쩔챘", SCRIPT_PARAM_ONKEYDOWN,false,32)
 				for i, enemy in ipairs(GetEnemyHeroes()) do
 					Menu.exhaust:addParam(enemy.hash, enemy.charName, SCRIPT_PARAM_ONOFF, true)
 				end
@@ -597,8 +595,8 @@ function OnLoad()
 
 	if myHero:GetSpellData(SUMMONER_1).name:find("summonerdot") or myHero:GetSpellData(SUMMONER_2).name:find("summonerdot") then 
 		if Menu.Language.Language==1 then
-			Menu:addSubMenu("Á¡È­", "ignite")
-				Menu.ignite:addParam("autouse", "ÀÚµ¿»ç¿ë", SCRIPT_PARAM_ONOFF, true)
+			Menu:addSubMenu("횁징횊짯", "ignite")
+				Menu.ignite:addParam("autouse", "횣쨉쩔쨩챌쩔챘", SCRIPT_PARAM_ONOFF, true)
 		else
 			Menu:addSubMenu("ignite", "ignite")
 				Menu.ignite:addParam("autouse", "Auto Use", SCRIPT_PARAM_ONOFF, true)
@@ -606,31 +604,31 @@ function OnLoad()
 	end	
 	if spell_smite then		
 		if Menu.Language.Language==1 then
-			Menu:addSubMenu("°­Å¸", "smite")
-				Menu.smite:addParam("autouse", "ÀÚµ¿»ç¿ë", SCRIPT_PARAM_ONKEYTOGGLE,true,GetKey('G'))				
+			Menu:addSubMenu("째짯횇쨍", "smite")
+				Menu.smite:addParam("autouse", "횣쨉쩔쨩챌쩔챘", SCRIPT_PARAM_ONKEYTOGGLE,true,GetKey('G'))				
 				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
-				Menu.smite:addParam("smite0", "´ë»ó: Ã¨ÇÇ¾ð CC", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite00", "´ë»ó: Ã¨ÇÇ¾ð ¸·Å¸", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite0", "쨈챘쨩처: 횄짢횉횉쩐챨 CC", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite00", "쨈챘쨩처: 횄짢횉횉쩐챨 쨍쨌횇쨍", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
-				Menu.smite:addParam("smite1", "¹Ù·Ð", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite2", "µå·¡°ï", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite3", "°¡Àç(¹Ù·Ð/µå·¡°ï)", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite1", "쨔횢쨌횖", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite2", "쨉책쨌징째챦", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite3", "째징챌(쨔횢쨌횖/쨉책쨌징째챦)", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
-				Menu.smite:addParam("smite4", "ºí·çÁø¿µ ÀüÃ¼", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite5", "·¹µå", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite6", "ºí·ç", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite7", "µÎ²¨ºñ", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite8", "´Á´ë", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite9", "µ¶¼ö¸®", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite10", "°ñ·½", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite4", "쨘챠쨌챌횁첩쩔쨉 체횄쩌", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite5", "쨌쨔쨉책", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite6", "쨘챠쨌챌", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite7", "쨉횓짼짢쨘챰", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite8", "쨈횁쨈챘", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite9", "쨉쨋쩌철쨍짰", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite10", "째챰쨌쩍", SCRIPT_PARAM_ONOFF, true)
 				Menu.smite:addParam("Blank", "", SCRIPT_PARAM_INFO, "")
-				Menu.smite:addParam("smite11", "·¹µåÁø¿µ ÀüÃ¼", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite12", "·¹µå", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite13", "ºí·ç", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite14", "µÎ²¨ºñ", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite15", "´Á´ë", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite16", "µ¶¼ö¸®", SCRIPT_PARAM_ONOFF, true)
-				Menu.smite:addParam("smite17", "°ñ·½", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite11", "쨌쨔쨉책횁첩쩔쨉 체횄쩌", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite12", "쨌쨔쨉책", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite13", "쨘챠쨌챌", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite14", "쨉횓짼짢쨘챰", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite15", "쨈횁쨈챘", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite16", "쨉쨋쩌철쨍짰", SCRIPT_PARAM_ONOFF, true)
+				Menu.smite:addParam("smite17", "째챰쨌쩍", SCRIPT_PARAM_ONOFF, true)
 		else
 			Menu:addSubMenu("smite", "smite")
 				Menu.smite:addParam("autouse", "Auto Use", SCRIPT_PARAM_ONOFF, true)
