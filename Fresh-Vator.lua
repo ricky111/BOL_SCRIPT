@@ -32,13 +32,38 @@ SpellType = {
 	[8]={name="summonerexhaust", add=true, range=600, kname="탈진"}	-- success
 }
 Left = myHero:GetSpellData(SUMMONER_1) Right = myHero:GetSpellData(SUMMONER_2) JungleMobs = minionManager(MINION_JUNGLE, 760, player, MINION_SORT_MAXHEALTH_DEC)
---print(Left.name.." / "..Right.name)
-for i=1, 8, 1 do if Left.name == SpellType[i].name then Left = SpellType[i]  break end end
-for i=1, 8, 1 do if Right.name == SpellType[i].name then Right = SpellType[i] break end end
-if Left.name == "s5_summonersmiteplayerganker" or Left.name == "s5_summonersmiteduel" then Left=SpellType[7] end
-if Right.name == "s5_summonersmiteplayerganker" or Right.name == "s5_summonersmiterduel" then Right=SpellType[7] end
---print("Last:: "..Left.name.." / "..Right.name)
+print(Left.name)
+for i=1, 8, 1 do 
+	if Left.name == SpellType[i].name then 
+		Left = SpellType[i]
+		if Left.name == "summonerdot" then spell_dot = SUMMONER_1 end
+		if Left.name == "summonerheal" then spell_heal = SUMMONER_1 end
+		if Left.name == "summonersmite" then spell_smite = SUMMONER_1 end 			--  일반강타
+		if Left.name == "s5_summonersmiteplayerganker" then spell_smite = SUMMONER_1 end 	--  파랑강타
+		if Left.name == "s5_summonersmiteduel" then spell_smite = SUMMONER_1 end 		--  빨강강타
+		if Left.name == "itemsmiteaoe" then spell_smite = SUMMONER_1 end 				--  보라강타
+		if Left.name == "s5_summonersmitequick" then spell_smite = SUMMONER_1 end 		--  흰색강타
+		break 
+	end 
+end
 
+for i=1, 8, 1 do 
+	if Right.name == SpellType[i].name then 
+		Right = SpellType[i]
+		if Right.name == "summonerdot" then spell_dot = SUMMONER_2 end
+		if Right.name == "summonerheal" then spell_heal = SUMMONER_2 end
+		if Right.name == "summonersmite" then spell_smite = SUMMONER_2 end 			--  일반강타
+		if Right.name == "s5_summonersmiteplayerganker" then spell_smite = SUMMONER_2 end 	--  파랑강타
+		if Right.name == "s5_summonersmiteduel" then spell_smite = SUMMONER_2 end 		--  빨강강타
+		if Right.name == "itemsmiteaoe" then spell_smite = SUMMONER_2 end 				--  보라강타
+		if Right.name == "s5_summonersmitequick" then spell_smite = SUMMONER_2 end 		--  흰색강타
+		break 
+	end 
+end
+
+if Left.name == "s5_summonersmiteplayerganker" or Left.name == "s5_summonersmiteduel" or Left.name == "itemsmiteaoe" or Left.name == "s5_summonersmitequick" then Left=SpellType[7] spell_smite=SUMMONER_1 end
+if Right.name == "s5_summonersmiteplayerganker" or Right.name == "s5_summonersmiteduel" or Right.name == "itemsmiteaoe" or Right.name == "s5_summonersmitequick" then Right=SpellType[7] spell_smite=SUMMONER_2 end
+--print("L: "..spell_smite)
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -100,8 +125,8 @@ function OnLoad()
 			Menu:addSubMenu("ignite", "ignite")
 				Menu.ignite:addParam("autouse", "Auto Use", SCRIPT_PARAM_ONOFF, true)
 		end
-	end
-	if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite") then 			
+	end	
+	if spell_smite then		
 		if Menu.Language.Language==1 then
 			Menu:addSubMenu("강타", "smite")
 				Menu.smite:addParam("autouse", "자동사용", SCRIPT_PARAM_ONKEYTOGGLE,true,GetKey('G'))				
@@ -217,148 +242,79 @@ function OnTick()
 		end
 	end
 
-	if (myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite")) and Menu.smite.autouse then
-		if Menu.smite.smite00 and ValidTarget(KTarget, 710) and (KTarget.health < bluesmiteDMG) then
-			if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-				CastSpell(SUMMONER_1, KTarget)
-			else
-				CastSpell(SUMMONER_2, KTarget)
-			end
+	if spell_smite and Menu.smite.autouse then				
+		if Menu.smite.smite00 and ValidTarget(KTarget, 710) and (KTarget.health < bluesmiteDMG) then			
+			CastSpell(spell_smite, KTarget)
 		end
-		if Menu.smite.smite0 and ValidTarget(STarget, 710) then
-			if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-				CastSpell(SUMMONER_1, STarget)
-			else
-				CastSpell(SUMMONER_2, STarget)
-			end
-		end
-		for i, junglemob in pairs(JungleMobs.objects) do			
+		if Menu.smite.smite0 and ValidTarget(STarget, 710) then			
+			CastSpell(spell_smite, STarget)
+		end		
+		for i, junglemob in pairs(JungleMobs.objects) do				
 			if junglemob == nil then
 				return
-			end
-			--print(junglemob.name)
+			end			
 			if ValidTarget(junglemob, 720) then
 				if Menu.smite.smite1 and junglemob.name=="SRU_Baron12.1.1" and junglemob.health < smiteDMG then
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 
 				if Menu.smite.smite2 and junglemob.name=="SRU_Dragon6.1.1" and junglemob.health < smiteDMG then					
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 
 				if Menu.smite.smite3 and (junglemob.name=="Sru_Crab15.1.1" or junglemob.name=="Sru_Crab16.1.1") and junglemob.health < smiteDMG then
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 
-				if Menu.smite.smite4 then
+				if Menu.smite.smite4 then					
 				if Menu.smite.smite5 and junglemob.name=="SRU_Red4.1.1" and junglemob.health < smiteDMG then				
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 				
 				if Menu.smite.smite6 and junglemob.name=="SRU_Blue1.1.1" and junglemob.health < smiteDMG then				
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 
 				if Menu.smite.smite7 and junglemob.name=="SRU_Gromp13.1.1" and junglemob.health < smiteDMG then				
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 
 				if Menu.smite.smite8 and junglemob.name=="SRU_Murkwolf2.1.1" and junglemob.health < smiteDMG then				
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 
 				if Menu.smite.smite9 and junglemob.name=="SRU_Razorbeak3.1.1" and junglemob.health < smiteDMG then				
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 
 				if Menu.smite.smite10 and junglemob.name=="SRU_Krug5.1.2" and junglemob.health < smiteDMG then				
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 				end
 
 				if Menu.smite.smite11 then
 				if Menu.smite.smite12 and junglemob.name=="SRU_Red10.1.1" and junglemob.health < smiteDMG then				
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 
 				if Menu.smite.smite13 and junglemob.name=="SRU_Blue7.1.1" and junglemob.health < smiteDMG then				
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 
 				if Menu.smite.smite14 and junglemob.name=="SRU_Gromp14.1.1" and junglemob.health < smiteDMG then				
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 
 				if Menu.smite.smite15 and junglemob.name=="SRU_Murkwolf8.1.1" and junglemob.health < smiteDMG then				
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 
 				if Menu.smite.smite16 and junglemob.name=="SRU_Razorbeak9.1.1" and junglemob.health < smiteDMG then				
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 
 				if Menu.smite.smite17 and junglemob.name=="SRU_Krug11.1.2" and junglemob.health < smiteDMG then				
-					if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then
-						CastSpell(SUMMONER_1, junglemob)
-					else
-						CastSpell(SUMMONER_2, junglemob)
-					end
+					CastSpell(spell_smite, junglemob)
 				end
 				end
 			end
@@ -405,11 +361,11 @@ function OnGainBuff(unit, buff)
 end
 
 function Check()	
-	if (myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite")) and Menu.smite.autouse then
-		if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then Left.range=700 else Right.range=700 end
+	if spell_smite and Menu.smite.autouse then
+		if spell_smite==SUMMONER_1 then Left.range=700 else Right.range=700 end
 	end
-	if (myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite")) and not Menu.smite.autouse then
-		if myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") then Left.range=0 else Right.range=0 end
+	if spell_smite and not Menu.smite.autouse then
+		if Left.name=="summonersmite" then Left.range=0 else Right.range=0 end
 	end
 
 
@@ -418,7 +374,7 @@ function Check()
 		KTarget = Target(K)				
 	end	
 
-	if (myHero:GetSpellData(SUMMONER_1).name:find("summonersmite") or myHero:GetSpellData(SUMMONER_2).name:find("summonersmite")) and Menu.smite.autouse then
+	if spell_smite and Menu.smite.autouse then
 		if myHero.level >14 then smiteDMG = 800 + ((myHero.level-14)*50) end
 		if myHero.level > 9 then smiteDMG = 600 + ((myHero.level-9)*40) end
 		if myHero.level > 5 then smiteDMG = 480 + ((myHero.level-5)*30) end
