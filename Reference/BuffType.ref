@@ -1,0 +1,53 @@
+function checkCC(myHero)
+
+	for i = 0, player.buffCount, 1 do
+	  local buff = player:getBuff(i)
+
+	if myHero.isTaunted == true or
+           myHero.isFeared == true or
+           myHero.isCharmed == true or
+           myHero.isAsleep == true or
+           myHero.isFleeing == true or
+           buff.name == "SummonerDot" or
+	   buff.name == "SummonerExhaust" or
+	   buff.name == "MordekaiserChildrenOfTheGrave" or
+	   buff.name ==  "SkarnerImpale" or
+	   buff.name == "suppression" or
+ 	   buff.name == "Silence" or
+	   buff.name == "stun" or
+	   buff.name == "Fear" or
+	   buff.name == "taunt" or
+	   buff.name == "LuxLightBindingMis" or
+	   buff.name == "Wither" or
+	   buff.name == "SonaCrescendo" or
+	   buff.name == "RunePrison" or
+	   buff.name == "DarkBindingMissile" or
+	   buff.name == "IceBlast" or
+	   buff.name == "timewarpslow" or
+	   buff.name == "caitlynyordletrapdebuff" or
+	   buff.name == "CurseoftheSadMummy" or
+	   buff.name == "EnchantedCrystalArrow" or
+	   buff.name == "BlindingDart" or
+	   buff.name == "grievouswounds" or
+	   buff.name == "LuluWTwo" or	   
+	   buff.name == "fizzmarinerdoombomb" then	
+		return true
+	 end
+         end
+
+end
+
+---------------------------------------------------------------------
+
+local NegativBuffTypes = {
+            [3] = true, --DEBUFF
+            [5] = true, --stun
+            [8] = true, --taunt
+            [10] = true, --SLOW
+            [11] = true, --root        
+            [21] = true, --fear
+            [22] = true, --charm
+            [24] = true, --suppress
+            [28] = true, --flee
+            [29] = true, --knockup
+}
