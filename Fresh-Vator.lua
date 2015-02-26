@@ -1,4 +1,4 @@
-ver = "1.007"
+ver = "1.008"
 
 Host = "raw.github.com"
 ServerPath = "/KorFresh/BOL_SCRIPT/master/Vator.stats".."?rand="..math.random(1,10000)
@@ -28,7 +28,7 @@ SpellType = {
 	[4]={name="summonerbarrier", add=true, range=0, kname="방어막"},
 	[5]={name="summonermana", add=true, range=0, kname="총명"},	
 	[6]={name="summonerboost", add=true, range=0, kname="정화"},	
-	[7]={name="summonersmite", add=true, range=700, kname="강타"},
+	[7]={name="summonersmite", add=true, range=500, kname="강타"},
 	[8]={name="summonerexhaust", add=true, range=600, kname="탈진"}
 }
 Left = myHero:GetSpellData(SUMMONER_1) Right = myHero:GetSpellData(SUMMONER_2) JungleMobs = minionManager(MINION_JUNGLE, 760, player, MINION_SORT_MAXHEALTH_DEC)
